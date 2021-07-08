@@ -18,7 +18,7 @@ Library originally supported Python 2.1, 2.2, 2.4, 2.4, 2.5, 2.6, 2.7. Now only 
 
 To get started:
 
-    python -m pip install -r requirements.txt  # optional for Python 2, runs faster with dependencies installed
+    python -m pip install -r requirements.txt  # runs faster Py2 and Py3, slower alternative is `python -m pip install blowfish` Python 3 only
 
     python test_chi.py
 
@@ -31,4 +31,4 @@ To get started:
 ## TODO
 
   * Look at using pycryptodomex
-  * Pure Python 3 Blowfish (note will be much slower)
+  * Pure Python 2 Blowfish (note will be much slower)

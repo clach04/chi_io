@@ -94,12 +94,29 @@ try:
     from Crypto.Cipher import Blowfish
     TheBlowfishCons = Blowfish.new
     TheBlowfishClass = type(TheBlowfishCons(b'1234', mode=Blowfish.MODE_ECB))
+    def TheBlowfishCipher(password_bytes):
+        return TheBlowfishCons(password_bytes, mode=Blowfish.MODE_ECB)
     print('using PyCrypto')
     # TODO consider implementing support for pycryptodomex
 except:
-    import blowfish  # currently py2 only :-(
-    TheBlowfishClass = blowfish.Blowfish
-    TheBlowfishCons = blowfish.Blowfish
+    import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
+    class PurePython3Blowfish():
+        """Only impements ECB mode
+        """
+        def __init__(self, password_key):
+            """password_key is byte type and must be between 4 and 56 bytes long.
+            """
+            self.cipher = cipher = blowfish.Cipher(password_key)
+        def decrypt(self, data_encrypted):
+            data_decrypted = b"".join(self.cipher.decrypt_ecb(data_encrypted))
+            return data_decrypted
+        def encrypt(self, data):
+            data_encrypted = b"".join(self.cipher.encrypt_ecb(data))
+            return data_encrypted
+    TheBlowfishCons = PurePython3Blowfish
+    TheBlowfishClass = type(TheBlowfishCons(b'1234'))
+    def TheBlowfishCipher(password_bytes):
+        return TheBlowfishCons(password_bytes)
 
 try:
     basestring  # only used to determine if parameter is a filename
@@ -170,7 +187,7 @@ def CHI_cipher(password):
         m = md5checksum()
         m.update(password)
         md5key = m.digest()
-        cipher = TheBlowfishCons(md5key, mode=Blowfish.MODE_ECB)
+        cipher = TheBlowfishCipher(md5key)
     return cipher
 
 def read_encrypted_file(fileinfo, password):
