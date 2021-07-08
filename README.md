@@ -2,7 +2,7 @@
 
 Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this, this is intended to be compatible with Tombo, Kumagusu, MiniNoteViewer, etc.
 
-Comptable with:
+Compatible with:
 
   * http://tombo.osdn.jp/En/
   * https://osdn.net/projects/kumagusu/
