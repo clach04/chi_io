@@ -5,32 +5,16 @@
 
 Sample usage:
 
-    ./test_notes.py -v
-    ./test_notes.py -v TestSearch
-
-
-
-% grep class test_notes.py|grep Test |awk '{print $2}' | cut -d\( -f1
-TestChiIOUtil
-TestChiIO
-TestCompatChiIO
-TestSearch
-TestFileNotesClass
-TestAbsFileNotesPathClass
-TestPyFsOSFSFileNotesClass
-TestPyFsOSFSAbsPathFileNotesClass
-TestPyFsZipFileNotesClass
+    ./test_chi.py -v
+    ./test_chi.py -v TestCompatChiIO
 
 """
 
 import os
 import sys
 import string
-import re
 import codecs
 import unittest
-import zipfile
-import subprocess
 
 
 try:
@@ -43,10 +27,7 @@ except ImportError:
     except ImportError:
         from io import BytesIO as FakeFile  # py3
 
-#import chi_io
-from pytombo import chi_io
-
-
+import chi_io
 
 
 class TestChiIOUtil(unittest.TestCase):
