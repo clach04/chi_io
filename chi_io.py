@@ -101,7 +101,7 @@ try:
 except:
     import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
     class PurePython3Blowfish():
-        """Only impements ECB mode
+        """Only implements ECB mode
         """
         def __init__(self, password_key):
             """password_key is byte type and must be between 4 and 56 bytes long.
@@ -126,7 +126,7 @@ except NameError:
 is_py3 = sys.version_info >= (3,)
 
 
-# Workaround Ubunut/Debian/Linux 64-bit array bug
+# Workaround Ubuntu/Debian/Linux 64-bit array bug
 x = array.array('L', [0])
 if x.itemsize == 4:
 	FMT_ARRAY_4BYTE = 'L'
@@ -171,13 +171,13 @@ class UnsupportedFile(ChiIO):
     '''File not encrypted/not supported exception'''
 
 def gen_random_string(length_of_str):
-    """generate a srting containing random characters of length length_of_str
+    """generate a string containing random characters of length length_of_str
     """
     source_set = string.ascii_letters+string.digits+string.punctuation
     result=[]
     for x in range(length_of_str):
         result.append(random.choice(source_set))
-    return ''.join(result).encode('us-ascii')  # convert (unicode) string to bytes
+    return ''.join(result).encode('us-ascii')  # convert (Unicode) string to bytes
 
 def CHI_cipher(password):
     if isinstance(password, TheBlowfishClass):
@@ -241,7 +241,7 @@ def read_encrypted_file(fileinfo, password):
         enc_data = enc_data[8:]
         data = cipher.decrypt(data)
         ## based on debug code (and tombo specific additions to blowfish.c) in Tombo
-        ## tombo is using the base blowfish alogrithm AND then applies more bit fiddling....
+        ## Tombo is using the base blowfish algorithm AND then applies more bit fiddling....
         ## performs bitwise exclusive or on decrypted text from blowfish and "BLOWFISH" (note this static gets modified....)
         for x in range(8):
             tmp_byte_a = data[x]
