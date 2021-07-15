@@ -30,8 +30,9 @@ To get started:
 
 ## TODO
 
-  * Look at using pycryptodomex
-  * Pure Python 2 Blowfish (note will be much slower)
   * Refactor chi_io code
+  * Implement Tombo chi Cipher that follows PEP 272
+  * Check for pycryptodomex first
+  * Pure Python 2 Blowfish (note will be much slower)
   * Update Pure python Blowfish (wrapper or upstream) to support Cipher PEP 272
     API for Block Encryption Algorithms v1.0 https://www.python.org/dev/peps/pep-0272/
