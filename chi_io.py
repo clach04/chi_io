@@ -96,10 +96,12 @@ try:
     TheBlowfishClass = type(TheBlowfishCons(b'1234', mode=Blowfish.MODE_ECB))
     def TheBlowfishCipher(password_bytes):
         return TheBlowfishCons(password_bytes, mode=Blowfish.MODE_ECB)
-    print('using PyCrypto')
+    #print('using PyCrypto')
+    implementation = 'using PyCrypto'
     # TODO consider implementing support for pycryptodomex
 except:
     import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
+    implementation = 'using blowfish(pure python)'
     class PurePython3Blowfish():
         """Only implements ECB mode
         """

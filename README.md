@@ -22,11 +22,26 @@ To get started:
 
     python test_chi.py
 
+## Example
+
+    Python 2.7.10 (default, May 23 2015, 09:40:32) [MSC v.1500 32 bit (Intel)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import chi_io  # https://github.com/clach04/chi_io Python access to Tombo encrypted files
+    >>> chi_io.implementation
+    'using PyCrypto'
+    >>> plain_text = b'12345678'
+    >>> enc_fname = 'chi_io_test1.chi'
+    >>> mypassword = b'testing'
+    >>> chi_io.write_encrypted_file(enc_fname, mypassword, plain_text)
+    >>> read_plain_text = chi_io.read_encrypted_file(enc_fname, mypassword)
+    >>> assert plain_text == read_plain_text
+
 ## NOTES
 
   * PyCrypto will work fine but PyCryptodome is preferred.
     * The known vulnerability in PyCryptodome is not in the Blowfish implementation
   * Blowfish is not recommended by its author! Neither is ECB mode which Tombo uses (note Tombo does some additional bit fiddling but using Tombo CHI encryption for sensitive files is not recommended)
+  * https://github.com/jashandeep-sohi/python-blowfish the pure Python 3.4+ blowfish implementation works great, but is slower than PyCryptodome
 
 ## TODO
 
