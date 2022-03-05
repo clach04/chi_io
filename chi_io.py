@@ -65,7 +65,7 @@ import string
 import random
 try:
     #raise ImportError
-    from cStringIO import StringIO as FakeFile  # NOTE only use when not using .write() method
+    from cStringIO import StringIO as FakeFile  # NOTE only use when not using .write() method - does not support Unicode
 except ImportError:
     try:
         from StringIO import StringIO as FakeFile
