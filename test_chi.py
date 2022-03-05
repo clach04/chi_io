@@ -198,7 +198,7 @@ class TestChiIO(TestChiIOUtil):
         #print repr(crypted_data)
 
         fileptr1 = FakeFile(crypted_data)
-        chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, '+')
+        chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, '+')  # NOTE + is Read and Write which Cpython 2.x cStringIO does not support, expect AttributeError: 'cStringIO.StringI' object has no attribute 'write'
         chi_fileptr.write(b'text')
         chi_fileptr.close()
         crypted_result = fileptr1.getvalue()
