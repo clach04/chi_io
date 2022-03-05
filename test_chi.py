@@ -340,4 +340,5 @@ ter no rule than cruel rule.\r\n'''
 
 if __name__ == '__main__':
     print(sys.version)
+    print(chi_io.implementation)
     unittest.main()

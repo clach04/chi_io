@@ -87,7 +87,7 @@ See:
     http://jason.diamond.name/weblog/2005/10/05/pypwsafe-0-0-2-with-setup-dot-py
 """
 try:
-   # raise ImportError
+    raise ImportError
     # Try fast blowfish first
     # https://github.com/Legrandin/pycryptodome - PyCryptodome (safer/modern PyCrypto)
     # http://www.dlitz.net/software/pycrypto/ - PyCrypto - The Python Cryptography Toolkit
@@ -100,25 +100,32 @@ try:
     implementation = 'using PyCrypto'
     # TODO consider implementing support for pycryptodomex
 except:
-    import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
-    implementation = 'using blowfish(pure python)'
-    class PurePython3Blowfish():
-        """Only implements ECB mode
-        """
-        def __init__(self, password_key):
-            """password_key is byte type and must be between 4 and 56 bytes long.
+    try:
+        import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
+        implementation = 'using blowfish(pure python)'
+        class PurePython3Blowfish():
+            """Only implements ECB mode
             """
-            self.cipher = cipher = blowfish.Cipher(password_key)
-        def decrypt(self, data_encrypted):
-            data_decrypted = b"".join(self.cipher.decrypt_ecb(data_encrypted))
-            return data_decrypted
-        def encrypt(self, data):
-            data_encrypted = b"".join(self.cipher.encrypt_ecb(data))
-            return data_encrypted
-    TheBlowfishCons = PurePython3Blowfish
-    TheBlowfishClass = type(TheBlowfishCons(b'1234'))
-    def TheBlowfishCipher(password_bytes):
-        return TheBlowfishCons(password_bytes)
+            def __init__(self, password_key):
+                """password_key is byte type and must be between 4 and 56 bytes long.
+                """
+                self.cipher = cipher = blowfish.Cipher(password_key)
+            def decrypt(self, data_encrypted):
+                data_decrypted = b"".join(self.cipher.decrypt_ecb(data_encrypted))
+                return data_decrypted
+            def encrypt(self, data):
+                data_encrypted = b"".join(self.cipher.encrypt_ecb(data))
+                return data_encrypted
+        TheBlowfishCons = PurePython3Blowfish
+        TheBlowfishClass = type(TheBlowfishCons(b'1234'))
+        def TheBlowfishCipher(password_bytes):
+            return TheBlowfishCons(password_bytes)
+    except ImportError:
+        import py2_blowfish as blowfish
+        implementation = 'using blowfish(pure python2)'
+        TheBlowfishClass = blowfish.Blowfish
+        TheBlowfishCons = blowfish.Blowfish
+        TheBlowfishCipher = blowfish.Blowfish
 
 try:
     basestring  # only used to determine if parameter is a filename
