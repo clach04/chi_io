@@ -14,24 +14,51 @@ import os
 import sys
 import string
 import codecs
-import unittest
+try:
+    if sys.version_info < (2, 3):
+        raise ImportError
+    import unittest2
+    unittest = unittest2
+except ImportError:
+    import unittest
+    unittest2 = None
 
 
 try:
     raise ImportError  # do not use cStringIO for readwrite_seek test
     # AttributeError: 'cStringIO.StringI' object has no attribute 'write'
     from cStringIO import StringIO as FakeFile
+    using_cstring = True
 except ImportError:
     try:
         from StringIO import StringIO as FakeFile
+        using_cstring = True
     except ImportError:
         from io import BytesIO as FakeFile  # py3
+        using_cstring = False
 
 import chi_io
 
 
 class TestChiIOUtil(unittest.TestCase):
-    pass
+    def skip(self, reason):
+        """Skip current test because of `reason`.
+
+        NOTE currently expects unittest2, and defaults to "pass" if not available.
+
+        unittest2 does NOT work under Python 2.2.
+        Could potentially use nose or py.test which has (previously) supported Python 2.2
+          * nose http://python-nose.googlecode.com/svn/wiki/NoseWithPython2_2.wiki
+          * py.test http://codespeak.net/pipermail/py-dev/2005-February/000203.html
+        """
+        #self.assertEqual(1, 0)
+        if unittest2:
+            raise unittest2.SkipTest(reason)
+        else:
+            print(reason)
+            self.fail('SKIP THIS TEST: ' + reason)
+            #self.assertTrue(False, reason)
+            #raise Exception(reason)
 
 
 class TestChiIO(TestChiIOUtil):
@@ -189,6 +216,8 @@ class TestChiIO(TestChiIOUtil):
         self.assertRaises(ValueError, chi_fileptr.read)
 
     def test_readwrite_seek_middle(self):
+        if using_cstring:
+            self.skip('cString does not support read and write on the same object')
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
 
