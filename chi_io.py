@@ -98,11 +98,13 @@ See:
     http://jason.diamond.name/weblog/2005/10/04/pypwsafe-release-1
     http://jason.diamond.name/weblog/2005/10/05/pypwsafe-0-0-2-with-setup-dot-py
 """
+blowfish = None
 try:
     # raise ImportError
     # Try fast blowfish first
     # https://github.com/Legrandin/pycryptodome - PyCryptodome (safer/modern PyCrypto)
     # http://www.dlitz.net/software/pycrypto/ - PyCrypto - The Python Cryptography Toolkit
+    import Crypto
     from Crypto.Cipher import Blowfish
 
     TheBlowfishCons = Blowfish.new
@@ -112,7 +114,7 @@ try:
         return TheBlowfishCons(password_bytes, mode=Blowfish.MODE_ECB)
 
     # print('using PyCrypto')
-    implementation = 'using PyCrypto'
+    implementation = 'using PyCrypto ' + Crypto.__version__
     # TODO consider implementing support for pycryptodomex
 except BaseException:
     try:
@@ -151,6 +153,9 @@ except BaseException:
         TheBlowfishClass = blowfish.Blowfish
         TheBlowfishCons = blowfish.Blowfish
         TheBlowfishCipher = blowfish.Blowfish
+
+if blowfish:
+    implementation += ' ' + getattr(blowfish, '__version__', 'unknown version')
 
 try:
     basestring  # only used to determine if parameter is a filename
