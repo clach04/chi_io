@@ -14,13 +14,16 @@ import os
 import sys
 import string
 import codecs
+
 try:
     if sys.version_info < (2, 3):
         raise ImportError
     import unittest2
+
     unittest = unittest2
 except ImportError:
     import unittest
+
     unittest2 = None
 
 
@@ -28,13 +31,16 @@ try:
     raise ImportError  # do not use cStringIO for readwrite_seek test
     # AttributeError: 'cStringIO.StringI' object has no attribute 'write'
     from cStringIO import StringIO as FakeFile
+
     using_cstring = True
 except ImportError:
     try:
         from StringIO import StringIO as FakeFile
+
         using_cstring = True
     except ImportError:
         from io import BytesIO as FakeFile  # py3
+
         using_cstring = False
 
 import chi_io
@@ -51,48 +57,48 @@ class TestChiIOUtil(unittest.TestCase):
           * nose http://python-nose.googlecode.com/svn/wiki/NoseWithPython2_2.wiki
           * py.test http://codespeak.net/pipermail/py-dev/2005-February/000203.html
         """
-        #self.assertEqual(1, 0)
+        # self.assertEqual(1, 0)
         if hasattr(unittest, 'SkipTest'):
             raise unittest.SkipTest(reason)
         else:
             print(reason)
             self.fail('SKIP THIS TEST: ' + reason)
-            #self.assertTrue(False, reason)
-            #raise Exception(reason)
+            # self.assertTrue(False, reason)
+            # raise Exception(reason)
 
 
 class TestChiIO(TestChiIOUtil):
     def test_get_what_you_put_in(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
-        
+
         fileptr1 = FakeFile()
         chi_io.write_encrypted_file(fileptr1, test_password, test_data)
         crypted_data = fileptr1.getvalue()
-        #print repr(crypted_data)
-        
+        # print repr(crypted_data)
+
         fileptr2 = FakeFile(crypted_data)
         result_data = chi_io.read_encrypted_file(fileptr2, test_password)
-        #print repr(result_data)
+        # print repr(result_data)
         self.assertEqual(test_data, result_data)
 
     def test_same_input_different_crypted_text(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
-        
+
         fileptr1 = FakeFile()
         chi_io.write_encrypted_file(fileptr1, test_password, test_data)
         crypted_data1 = fileptr1.getvalue()
-        
+
         fileptr2 = FakeFile()
         chi_io.write_encrypted_file(fileptr2, test_password, test_data)
         crypted_data2 = fileptr2.getvalue()
         self.assertNotEqual(crypted_data1, crypted_data2)
-        
+
         fileptr3 = FakeFile(crypted_data1)
         result_data = chi_io.read_encrypted_file(fileptr3, test_password)
         self.assertEqual(test_data, result_data)
-        
+
         fileptr3 = FakeFile(crypted_data2)
         result_data = chi_io.read_encrypted_file(fileptr3, test_password)
         self.assertEqual(test_data, result_data)
@@ -100,41 +106,43 @@ class TestChiIO(TestChiIOUtil):
     def test_fileread(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
-        
+
         fileptr1 = FakeFile()
         chi_io.write_encrypted_file(fileptr1, test_password, test_data)
         crypted_data = fileptr1.getvalue()
-        #print repr(crypted_data)
-        
+        # print repr(crypted_data)
+
         fileptr2 = FakeFile(crypted_data)
         chi_fileptr = chi_io.ChiAsFile(fileptr2, test_password)
         result_data = chi_fileptr.read()
-        #print repr(result_data)
+        # print repr(result_data)
         self.assertEqual(test_data, result_data)
 
     def test_filewrite(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
-        
+
         fileptr1 = FakeFile()
         chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, 'w')
         chi_fileptr.write(test_data)
         chi_fileptr.close()
         crypted_data = fileptr1.getvalue()
-        #print 'crypted_data ', repr(crypted_data)
-        
+        # print 'crypted_data ', repr(crypted_data)
+
         fileptr2 = FakeFile(crypted_data)
         result_data = chi_io.read_encrypted_file(fileptr2, test_password)
-        #print repr(result_data)
+        # print repr(result_data)
         self.assertEqual(test_data, result_data)
 
     def test_file_bad_read(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
-        
+
         fileptr1 = FakeFile()
         chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, 'w')
-        chi_fileptr.write(test_data)  # file is now a write only file, any reads after this point are an error
+        chi_fileptr.write(
+            test_data
+        )  # file is now a write only file, any reads after this point are an error
         self.assertRaises(IOError, chi_fileptr.read)
 
     def test_file_bad_write(self):
@@ -144,7 +152,7 @@ class TestChiIO(TestChiIOUtil):
         fileptr1 = FakeFile()
         chi_io.write_encrypted_file(fileptr1, test_password, test_data)
         crypted_data = fileptr1.getvalue()
-        
+
         fileptr1 = FakeFile(crypted_data)
         chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password)
         result_data = chi_fileptr.read()
@@ -156,18 +164,18 @@ class TestChiIO(TestChiIOUtil):
         test_password = b'mypassword'
         output_encoding = 'utf8'
         encoder, decoder, streamreader, streamwriter = codecs.lookup(output_encoding)
-        
+
         fileptr1 = FakeFile()
         chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, 'w')
         chi_fileptr = streamwriter(chi_fileptr)
         chi_fileptr.write(test_data)
         chi_fileptr.close()
         crypted_data = fileptr1.getvalue()
-        #print 'crypted_data ', repr(crypted_data)
-        
+        # print 'crypted_data ', repr(crypted_data)
+
         fileptr2 = FakeFile(crypted_data)
         result_data = chi_io.read_encrypted_file(fileptr2, test_password)
-        #print repr(result_data)
+        # print repr(result_data)
         result_data = result_data.decode(output_encoding)
         self.assertEqual(test_data, result_data)
 
@@ -176,23 +184,25 @@ class TestChiIO(TestChiIOUtil):
         test_password = b'mypassword'
         output_encoding = 'utf8'
         encoder, decoder, streamreader, streamwriter = codecs.lookup(output_encoding)
-        
+
         fileptr1 = FakeFile()
-        chi_io.write_encrypted_file(fileptr1, test_password, test_data.encode(output_encoding))
+        chi_io.write_encrypted_file(
+            fileptr1, test_password, test_data.encode(output_encoding)
+        )
         crypted_data = fileptr1.getvalue()
-        #print repr(crypted_data)
-        
+        # print repr(crypted_data)
+
         fileptr2 = FakeFile(crypted_data)
         chi_fileptr = chi_io.ChiAsFile(fileptr2, test_password)
         chi_fileptr = streamreader(chi_fileptr)
         result_data = chi_fileptr.read()
-        #print repr(result_data)
+        # print repr(result_data)
         self.assertEqual(test_data, result_data)
 
     def test_file_bad_write_after_close(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
-        
+
         fileptr1 = FakeFile()
         chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, 'w')
         chi_fileptr.write(test_data)
@@ -207,7 +217,7 @@ class TestChiIO(TestChiIOUtil):
         fileptr1 = FakeFile()
         chi_io.write_encrypted_file(fileptr1, test_password, test_data)
         crypted_data = fileptr1.getvalue()
-        
+
         fileptr1 = FakeFile(crypted_data)
         chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password)
         result_data = chi_fileptr.read()
@@ -224,10 +234,12 @@ class TestChiIO(TestChiIOUtil):
         fileptr1 = FakeFile()
         chi_io.write_encrypted_file(fileptr1, test_password, test_data)
         crypted_data = fileptr1.getvalue()
-        #print repr(crypted_data)
+        # print repr(crypted_data)
 
         fileptr1 = FakeFile(crypted_data)
-        chi_fileptr = chi_io.ChiAsFile(fileptr1, test_password, '+')  # NOTE + is Read and Write which Cpython 2.x cStringIO does not support, expect AttributeError: 'cStringIO.StringI' object has no attribute 'write'
+        chi_fileptr = chi_io.ChiAsFile(
+            fileptr1, test_password, '+'
+        )  # NOTE + is Read and Write which Cpython 2.x cStringIO does not support, expect AttributeError: 'cStringIO.StringI' object has no attribute 'write'
         chi_fileptr.write(b'text')
         chi_fileptr.close()
         crypted_result = fileptr1.getvalue()
@@ -235,7 +247,7 @@ class TestChiIO(TestChiIOUtil):
         fileptr2 = FakeFile(crypted_result)
         chi_fileptr = chi_io.ChiAsFile(fileptr2, test_password)
         result_data = chi_fileptr.read()
-        #print repr(result_data)
+        # print repr(result_data)
         self.assertEqual(b"text is just a small piece of text.", result_data)
 
 
@@ -247,11 +259,10 @@ class TestCompatChiIO(TestChiIOUtil):
         chi_fileptr = chi_io.ChiAsFile(fileptr2, test_password)
         result_data = chi_fileptr.read()
         self.assertEqual(expected_plain_text_data, result_data)
-    
+
     ## encrypted data taken from Win32 Tombo
     ## password for below data is: 'password'
-    binary_data = \
-b'BF01\xe6\x05\x00\x00\xb2\xdfB\xf2\x9d-]\x89c\x92|.\xae\x88\xaa\x96Oi\
+    binary_data = b'BF01\xe6\x05\x00\x00\xb2\xdfB\xf2\x9d-]\x89c\x92|.\xae\x88\xaa\x96Oi\
 \xd6\x1dOA\xb41_b\x9b\x84\xdeSS\x1c\xc1\xd6\x98\xcf\xd9e\x84\xff\xecm\
 \n\x8a|\xb4\xc3\xf0\xda\xd2@\xecqDaE_\xc1x\xff!sP+]\xa8F\xe2\n\xd5\xd1ZL\
 \x84Wh\x85\x9db\xc2\xf4\x14\x00\xccs+\xac\x0e\xe0a\xfb)\r\x04\x81\x7f\
@@ -317,8 +328,7 @@ b'BF01\xe6\x05\x00\x00\xb2\xdfB\xf2\x9d-]\x89c\x92|.\xae\x88\xaa\x96Oi\
 \xb6\xf5\x94b+\x1c6\x97yvs\xb2\x1a\x93)\xf6V\xaf(\x02Y\xef\x05\x8f)\
 \xa5\x1b\xd2y\x10vn\x9d\xf4\x0e\x1d\xff?\x94i\xcb\xc3\x1f!\xd5:\x96\xdb~\xad'
 
-    plain_text_data = \
-b'''aesop\r\n\r\nThe Frogs Desiring a King\r\n\r\nThe Frogs were l\
+    plain_text_data = b'''aesop\r\n\r\nThe Frogs Desiring a King\r\n\r\nThe Frogs were l\
 iving as happy as could be in a marshy swamp that just suited the\
 m; they went splashing about caring for nobody and nobody troubli\
 ng with them. But some of them thought that this was not right, t\
@@ -345,7 +355,7 @@ ter no rule than cruel rule.\r\n'''
 
     def test_win32_compat_fileread(self):
         test_password = b'password'
-        
+
         self.do_fileread(self.binary_data, test_password, self.plain_text_data)
 
     def test_seek_fileread(self):
@@ -362,9 +372,21 @@ ter no rule than cruel rule.\r\n'''
 
     def test_badpassword(self):
         test_password = b'badpassword'
-        
-        self.assertRaises(chi_io.BadPassword, self.do_fileread, self.binary_data, test_password, self.plain_text_data)
-        self.assertRaises(chi_io.ChiIO, self.do_fileread, self.binary_data, test_password, self.plain_text_data)
+
+        self.assertRaises(
+            chi_io.BadPassword,
+            self.do_fileread,
+            self.binary_data,
+            test_password,
+            self.plain_text_data,
+        )
+        self.assertRaises(
+            chi_io.ChiIO,
+            self.do_fileread,
+            self.binary_data,
+            test_password,
+            self.plain_text_data,
+        )
 
 
 if __name__ == '__main__':
