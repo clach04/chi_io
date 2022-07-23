@@ -31,6 +31,7 @@ Send questions, comments, bugs my way:
 """
 
 __author__ = "Michael Gilfix <mgilfix@eecs.tufts.edu>"
+__version__ = 'internal py2'
 
 class Blowfish:
 
