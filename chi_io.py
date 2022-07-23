@@ -91,7 +91,7 @@ See:
     http://jason.diamond.name/weblog/2005/10/05/pypwsafe-0-0-2-with-setup-dot-py
 """
 try:
-    raise ImportError
+    #raise ImportError
     # Try fast blowfish first
     # https://github.com/Legrandin/pycryptodome - PyCryptodome (safer/modern PyCrypto)
     # http://www.dlitz.net/software/pycrypto/ - PyCrypto - The Python Cryptography Toolkit
@@ -106,6 +106,7 @@ try:
 except:
     try:
         import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
+        # TODO version number from blowfish
         implementation = 'using blowfish(pure python)'
         class PurePython3Blowfish():
             """Only implements ECB mode
@@ -125,7 +126,7 @@ except:
         def TheBlowfishCipher(password_bytes):
             return TheBlowfishCons(password_bytes)
     except ImportError:
-        import py2_blowfish as blowfish
+        import py2_blowfish as blowfish  # FIXME add py2 conditional
         implementation = 'using blowfish(pure python2)'
         TheBlowfishClass = blowfish.Blowfish
         TheBlowfishCons = blowfish.Blowfish
