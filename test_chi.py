@@ -52,8 +52,8 @@ class TestChiIOUtil(unittest.TestCase):
           * py.test http://codespeak.net/pipermail/py-dev/2005-February/000203.html
         """
         #self.assertEqual(1, 0)
-        if unittest2:
-            raise unittest2.SkipTest(reason)
+        if hasattr(unittest, 'SkipTest'):
+            raise unittest.SkipTest(reason)
         else:
             print(reason)
             self.fail('SKIP THIS TEST: ' + reason)
