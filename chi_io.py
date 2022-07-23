@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+#
 # pytombo - Python library for processing plain text + encrypted notes.
 # Copyright (C) 2007  Chris Clark
 
@@ -679,16 +683,28 @@ def main(argv=None):
     if is_py3:
         global raw_input
         raw_input = input
+    try:
+        enc_fname = argv[1]
+    except IndexError:
+        enc_fname = None
 
-    do_what = raw_input('Encrypt (e) or Decrupt (d), anything else run demo test?: ')
-    
-    print("do_what", do_what, len(do_what))
-    
-    if do_what != 'e' and do_what != 'd':
+    if enc_fname == 'demo_test':
         return demo_test()
-        
-    enc_fname = raw_input('enter in encrypted filename (e.g. test.chi): ')
-    
+
+    if enc_fname:
+        # default to Decrypt when a filename specified
+        do_what = 'd'
+    else:
+        do_what = raw_input('Encrypt (e) or Decrypt (d), anything else run demo test?: ')
+
+        print("do_what", do_what, len(do_what))
+
+        if do_what != 'e' and do_what != 'd':
+            return demo_test()
+
+    if not enc_fname:
+        enc_fname = raw_input('enter in encrypted filename (e.g. test.chi): ')
+
     import getpass
     mypassword = getpass.getpass("Password:")
     mypassword = mypassword.encode('us-ascii')
