@@ -55,6 +55,7 @@ TODO list
     *   Remove string operations, try and use cStringIO library instead to save on garbage collection and creating new items
 """
 
+import os
 import sys
 
 is_py3 = sys.version_info >= (3,)
@@ -100,7 +101,10 @@ See:
 """
 blowfish = None
 try:
-    # raise ImportError
+    if os.environ.get('NO_PYCRYPTO'):
+        # disable PyCryptodome / PyCrypto via OS environment variable NO_PYCRYPTO
+        # i.e. force use of pure python Blowfish
+        raise ImportError
     # Try fast blowfish first
     # https://github.com/Legrandin/pycryptodome - PyCryptodome (safer/modern PyCrypto)
     # http://www.dlitz.net/software/pycrypto/ - PyCrypto - The Python Cryptography Toolkit
@@ -702,8 +706,6 @@ of a simple text file.
         print("assert error, probably tried to feed in Unicode")
         print(info)
     print('\n***************************\n')
-
-    import os
 
     os.remove('chi_io_test.chi')
     os.remove('chi_io_test1.chi')

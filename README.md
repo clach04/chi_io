@@ -22,7 +22,7 @@ To get started:
 
     python test_chi.py
 
-## Example
+## Examples
 
     Python 2.7.10 (default, May 23 2015, 09:40:32) [MSC v.1500 32 bit (Intel)] on win32
     Type "help", "copyright", "credits" or "license" for more information.
@@ -35,6 +35,15 @@ To get started:
     >>> chi_io.write_encrypted_file(enc_fname, mypassword, plain_text)
     >>> read_plain_text = chi_io.read_encrypted_file(enc_fname, mypassword)
     >>> assert plain_text == read_plain_text
+
+    python chi_io.py some_existing_file.chi  # will be prompted for password to decrypt existing file
+
+
+## Tests
+
+    python test_chi.py
+    env NO_PYCRYPTO=true python test_chi.py  # force usage of Pure Python Blowfish (slower)
+
 
 ## NOTES
 
