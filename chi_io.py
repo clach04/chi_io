@@ -763,6 +763,9 @@ def main(argv=None):
         try:
             print('Reading encrypted file', enc_fname)
             plain_str = read_encrypted_file(enc_fname, mypassword)
+            file_encoding = 'utf-8'  # assume! safe thing (avoid error) would be latin1 but would then have display issues
+            file_encoding = 'latin1'  # do not error, but may display incorrectly
+            plain_str = plain_str.decode(file_encoding)
             print('--------- Decrypted data ---------')
             print(plain_str)
             print('-------------- End ---------------')
