@@ -56,6 +56,7 @@ TODO list
 """
 
 import sys
+is_py3 = sys.version_info >= (3,)
 import struct
 import array
 try:
@@ -103,7 +104,7 @@ try:
     #print('using PyCrypto')
     implementation = 'using PyCrypto'
     # TODO consider implementing support for pycryptodomex
-except:
+except BaseException:
     try:
         import blowfish  # https://github.com/jashandeep-sohi/python-blowfish - currently py3 only :-(
         # TODO version number from blowfish
@@ -126,6 +127,8 @@ except:
         def TheBlowfishCipher(password_bytes):
             return TheBlowfishCons(password_bytes)
     except ImportError:
+        if is_py3:
+            raise
         import py2_blowfish as blowfish  # FIXME add py2 conditional
         implementation = 'using blowfish(pure python2)'
         TheBlowfishClass = blowfish.Blowfish
@@ -137,7 +140,6 @@ try:
 except NameError:
     basestring = str # py3 - in this module, only used to determine if parameter is a filename
 
-is_py3 = sys.version_info >= (3,)
 
 
 # Workaround Ubuntu/Debian/Linux 64-bit array bug
