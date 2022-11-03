@@ -50,7 +50,7 @@ To get started:
   * PyCrypto will work fine but PyCryptodome is preferred.
     * The known vulnerability in PyCryptodome is not in the Blowfish implementation
   * Blowfish is not recommended by its author! Neither is ECB mode which Tombo uses (note Tombo does some additional bit fiddling but using Tombo CHI encryption for sensitive files is not recommended)
-  * https://github.com/jashandeep-sohi/python-blowfish the pure Python 3.4+ blowfish implementation works great, but is slower than PyCryptodome
+  * GNU General Public License v3.0 https://github.com/jashandeep-sohi/python-blowfish the pure Python 3.4+ blowfish implementation works great, but is slower than PyCryptodome
 
 ## TODO
 
