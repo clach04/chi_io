@@ -37,6 +37,7 @@ To get started:
     >>> assert plain_text == read_plain_text
 
     python chi_io.py some_existing_file.chi  # will be prompted for password to decrypt existing file
+    env LANG=C.UTF-8 python chi_io.py some_existing_file.chi  # will be prompted for password to decrypt existing file
 
 
 ## Tests
