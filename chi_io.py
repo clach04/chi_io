@@ -333,6 +333,9 @@ def read_encrypted_file(fileinfo, password):
     chi_md5sum = decrypted_data[8:]
     chi_md5sum = chi_md5sum[:16]
 
+    if enc_filename:
+        in_file.close()
+
     if chi_md5sum == decriptsum:
         # passwords match, so data is valid
         return unencrypted_str
