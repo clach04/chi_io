@@ -7,9 +7,13 @@ Compatible with:
   * http://tombo.osdn.jp/En/
   * https://osdn.net/projects/kumagusu/
       * https://play.google.com/store/apps/details?id=jp.gr.java_conf.kumagusu
+      * https://github.com/clach04/kumagusu_mirror
   * http://hatapy.web.fc2.com/mininoteviewer.html
-      * https://play.google.com/store/apps/details?id=jp.gr.java_conf.hatalab.mnv&hl=en_US&gl=US
-
+      * https://play.google.com/store/apps/details?id=jp.gr.java_conf.hatalab.mnv
+      * https://github.com/clach04/mininoteviewer_mirror
+  * Tombo Edit
+      * https://github.com/clach04/tombo_edit_mirrorfork
+      
 
 Extracted from https://hg.sr.ht/~clach04/pytombo
 
