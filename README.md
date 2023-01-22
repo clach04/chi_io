@@ -5,15 +5,17 @@ Pure Python read/write encryption/decryption of encrypted Tombo chi files. If yo
 Compatible with:
 
   * http://tombo.osdn.jp/En/
-  * https://osdn.net/projects/kumagusu/
+  * https://osdn.net/projects/kumagusu/ - by tarshi
       * https://play.google.com/store/apps/details?id=jp.gr.java_conf.kumagusu
       * https://github.com/clach04/kumagusu_mirror
-  * http://hatapy.web.fc2.com/mininoteviewer.html
+  * https://web.archive.org/web/20171221160557/http://hatapy.web.fc2.com/mininoteviewer.html (was http://hatapy.web.fc2.com/mininoteviewer.html) - by hatalab
       * https://play.google.com/store/apps/details?id=jp.gr.java_conf.hatalab.mnv
       * https://github.com/clach04/mininoteviewer_mirror
-  * Tombo Edit
+  * Tombo Edit - by Michael Efimov
       * https://sourceforge.net/projects/tomboedit/
       * https://github.com/clach04/tombo_edit_mirrorfork
+   * TomboCrypt is a simple command line utility, written by Michael Efimov
+       * https://osdn.net/projects/tombo/releases/p1532
       
 
 Extracted from https://hg.sr.ht/~clach04/pytombo
