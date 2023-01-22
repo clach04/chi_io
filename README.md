@@ -1,10 +1,12 @@
 # chi_io
 
-Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this, this is intended to be compatible with Tombo, Kumagusu, MiniNoteViewer, etc.
+Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this (there a more modern and better best-practices available since 2004), this is intended to be **compatible** with Tombo, Kumagusu, MiniNoteViewer, etc.
 
 Compatible with:
 
   * http://tombo.osdn.jp/En/
+      * https://osdn.net/projects/tombo/scm/
+      * https://osdn.net/cvs/view/tombo/
   * https://osdn.net/projects/kumagusu/ - by tarshi
       * https://play.google.com/store/apps/details?id=jp.gr.java_conf.kumagusu
       * https://github.com/clach04/kumagusu_mirror
@@ -14,8 +16,10 @@ Compatible with:
   * Tombo Edit - by Michael Efimov
       * https://sourceforge.net/projects/tomboedit/
       * https://github.com/clach04/tombo_edit_mirrorfork
-   * TomboCrypt is a simple command line utility, written by Michael Efimov
-       * https://osdn.net/projects/tombo/releases/p1532
+   * TomboCrypt - by Michael Efimov
+       * https://osdn.net/projects/tombo/releases/p1532 simple command line utility - 32-bit binaries for Microsoft Windows and Linux
+       * https://osdn.net/projects/tombo/scm/git/Tombo/tree/master/contrib/TomboCrypt/ - source code
+       * NOTE this Python chi_io library is the closest to this, as it is Python it is portable and works anywhere there is Python (know to work on intel Windows and Linux, along with arm both 32-bit and 64-bit Linux)
       
 
 Extracted from https://hg.sr.ht/~clach04/pytombo
