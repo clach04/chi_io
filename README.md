@@ -18,7 +18,8 @@ Compatible with:
       * https://github.com/clach04/tombo_edit_mirrorfork
    * TomboCrypt - by Michael Efimov
        * https://osdn.net/projects/tombo/releases/p1532 simple command line utility - 32-bit binaries for Microsoft Windows and Linux
-       * https://osdn.net/projects/tombo/scm/git/Tombo/tree/master/contrib/TomboCrypt/ - source code
+       * https://osdn.net/projects/tombo/scm/git/Tombo/tree/master/contrib/TomboCrypt/ - source code in git
+       * https://osdn.net/cvs/view/tombo/Tombo/contrib/TomboCrypt/ - source code in CVS
        * NOTE this Python chi_io library is the closest to this, as it is Python it is portable and works anywhere there is Python (know to work on intel Windows and Linux, along with arm both 32-bit and 64-bit Linux)
       
 
