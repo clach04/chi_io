@@ -7,6 +7,9 @@ Compatible with:
   * http://tombo.osdn.jp/En/
       * https://osdn.net/projects/tombo/scm/
       * https://osdn.net/cvs/view/tombo/
+      * Forks and mirrors
+          * https://github.com/clach04/tombo_cvs - old code, 2002-2006
+          * https://github.com/clach04/tombo - latest, with some minor new features ahead of upstream - missing CVS history, 2009+
   * https://osdn.net/projects/kumagusu/ - by tarshi
       * https://play.google.com/store/apps/details?id=jp.gr.java_conf.kumagusu
       * https://github.com/clach04/kumagusu_mirror
