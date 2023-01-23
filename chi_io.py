@@ -263,7 +263,7 @@ def read_encrypted_file(fileinfo, password):
     password is a (byte) string, i.e. not Unicode type
     """
     if password is None:
-        raise BadPassword('None passed in for password for file %r' % fileinfo)
+        raise BadPassword('None passed in for password for file %r' % (fileinfo or 'file-like-object'))
 
     if isinstance(fileinfo, basestring):
         enc_filename = fileinfo
@@ -359,7 +359,7 @@ def read_encrypted_file(fileinfo, password):
     else:
         # password did not match, data is bogus
         # raise exception WITH information such as filename, do not dump out password as that could be a security hole
-        raise BadPassword(enc_filename)
+        raise BadPassword('for %r' % (enc_filename or 'file-like-object'))
 
 
 def write_encrypted_file(fileinfo, password, plaintext):
