@@ -149,14 +149,31 @@ except BaseException:
             return TheBlowfishCons(password_bytes)
 
     except ImportError:
-        if is_py3:
-            raise
-        import py2_blowfish as blowfish  # FIXME add py2 conditional
+        import pyblowfish  # built-in Pure Python 2 and 3 Blowfish from https://www.seanet.com/~bugbee/crypto/blowfish/ by Larry Bugbee
 
-        implementation = 'using blowfish(pure python2)'
-        TheBlowfishClass = blowfish.Blowfish
-        TheBlowfishCons = blowfish.Blowfish
-        TheBlowfishCipher = blowfish.Blowfish
+        # Fake version number from blowfish
+        implementation = 'using pyblowfish(pure python)'
+
+        class PurePythonBlowfish:
+            """Only implements ECB mode"""
+
+            def __init__(self, password_key):
+                """password_key is byte type and must be between 4 and 56 bytes long."""
+                self.cipher = cipher = pyblowfish.Blowfish(password_key)
+
+            def decrypt(self, data_encrypted):
+                data_decrypted = self.cipher.decipher_block(data_encrypted)
+                return data_decrypted
+
+            def encrypt(self, data):
+                data_encrypted = self.cipher.encipher_block(data)
+                return data_encrypted
+
+        TheBlowfishCons = PurePythonBlowfish
+        TheBlowfishClass = type(TheBlowfishCons(b'1234'))
+
+        def TheBlowfishCipher(password_bytes):
+            return TheBlowfishCons(password_bytes)
 
 if blowfish:
     implementation += ' ' + getattr(blowfish, '__version__', 'unknown version')
