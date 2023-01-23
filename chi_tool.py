@@ -92,12 +92,8 @@ def main(argv=None):
             failed = False
     except chi_io.BadPassword as info:
         print("bad password used. %r" % (info,))
-        if info:
-            print(info)
     except chi_io.UnsupportedFile as info:
         print("file was not encrypted or is not supported file %r" % (info,))
-        if info:
-            print(info)
     finally:
         if in_file != sys.stdin:
             in_file.close()
