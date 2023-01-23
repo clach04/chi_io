@@ -12,9 +12,14 @@ import sys
 import chi_io
 
 
+is_py3 = sys.version_info >= (3,)
+
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
+
+    note_encoding = 'utf-8' # FIXME hard coded
 
     verbose = True
     verbose = False
@@ -32,8 +37,13 @@ def main(argv=None):
                         help="encrypt in_filename")
     parser.add_option("-p", "--password", help="password, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-P", "--password_file", help="file name where password is to be read from, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
+    parser.add_option("-v", "--verbose", action="store_true")
     (options, args) = parser.parse_args(argv[1:])
     #print('%r' % ((options, args),))
+    verbose = options.verbose
+    if verbose:
+        print(sys.version)
+        print(chi_io.implementation)
 
     def usage():
         parser.print_usage()
@@ -71,6 +81,8 @@ def main(argv=None):
         if decrypt:
             #import pdb ; pdb.set_trace()
             plain_str = chi_io.read_encrypted_file(in_file, password)
+            if is_py3:
+                plain_str = plain_str.decode(note_encoding)
             out_file.write(plain_str)
         else:
             # encrypt
