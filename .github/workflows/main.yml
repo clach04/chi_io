@@ -30,3 +30,5 @@ jobs:
         run: env PYTHONWARNINGS="ignore::DeprecationWarning" python -m pip install -r requirements.txt
       - name: Run Python tests
         run: python test_chi.py
+      - name: Run Pure Python tests
+        run: env NO_PYCRYPTO=true  python test_chi.py
