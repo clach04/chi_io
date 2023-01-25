@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # _*_ coding: latin1 _*_
+# This is blowfish.py3 by Larry Bugbee
+# from https://www.seanet.com/~bugbee/crypto/blowfish/
 
 from __future__ import print_function   # needed by Python2
 
