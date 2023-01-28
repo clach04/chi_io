@@ -514,7 +514,6 @@ class TestCompatChiDecrypt(TestCompatChiData):
 
 class TestCompatChiEncryptDecrypt(TestCompatChiData):
     ## in memory equiv of TestChiIO.test_get_what_you_put_in()
-    ## TODO test_same_input_different_crypted_text()
     def test_get_what_you_put_in(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
@@ -549,6 +548,19 @@ class TestCompatChiEncryptDecrypt(TestCompatChiData):
         self.assertEqual(test_data, result_data)
         result_data = cipher.decrypt(crypted_data2)
         self.assertEqual(test_data, result_data)
+
+    def test_unicode_strings_rejected(self):
+        test_data = u"this is just a small piece of text."
+        test_password = b'mypassword'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        self.assertRaises(
+            chi_io.ChiIO,
+            cipher.encrypt,
+            test_data
+        )
+
 
 
 if __name__ == '__main__':

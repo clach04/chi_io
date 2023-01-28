@@ -386,11 +386,8 @@ class PEP272LikeCipher():
         # NOTE this code is almost identical to the code currently in write_encrypted_file()
         plain_text = string  # I hate the name in the pep, conflicts with stdlib :-(
 
-        assert isinstance(
-            plain_text, bytes
-        ), 'Only support 8 bit plaintext (got %r). Encode first, see help(codecs).' % type(
-            plaintext
-        )  # TODO / FIXME should this be a conditional check? assertions can be optimized away
+        if not isinstance(plain_text, bytes):
+            raise ChiIO('Only support 8-bit (binary/bytes) plaintext (got %r). Encode first, see help(codecs).' % type(plain_text))
 
         plain_text_len = len(plain_text)
         # print 'read in %d bytes' % plain_text_len
