@@ -45,6 +45,25 @@ except ImportError:
 
 import chi_io
 
+"""
+Missing tests for:
+
+  * chi_io.dumb_unix2dos()
+
+Present are tests that make calls to:
+  * chi_io.write_encrypted_file()
+  * chi_io.read_encrypted_file()
+  * chi_io.ChiAsFile class
+
+NOTE this does not mean exhaustive tests ;-)
+
+No explicit tests for:
+
+  * read_encrypted_file() - called by ChiAsFile.read()
+  * write_encrypted_file() - called by ChiAsFile.write() and close()
+  * CHI_cipher() - called by read_encrypted_file() and write_encrypted_file()
+
+"""
 
 class TestChiIOUtil(unittest.TestCase):
     def skip(self, reason):
@@ -225,7 +244,7 @@ class TestChiIO(TestChiIOUtil):
         self.assertEqual(test_data, result_data)
         self.assertRaises(ValueError, chi_fileptr.read)
 
-    def test_readwrite_seek_middle(self):
+    def test_readwrite_seek_middle(self):  # FIXME / TODO seek in name but no seek operation in test
         if using_cstring:
             self.skip('cString does not support read and write on the same object')
         test_data = b"this is just a small piece of text."
