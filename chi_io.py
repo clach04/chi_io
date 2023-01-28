@@ -530,7 +530,9 @@ def dumb_unix2dos(in_str):
 
 ## Consider using filelike from http://cheeseshop.python.org/pypi/filelike/
 class ChiAsFile(object):
-    """does not really honor seek(), etc. only read/write"""
+    """File like object around CHI encrypted files for reading and writing.
+    Partial seek() support for read operations ONLY.
+    Currently expects byte values for write and returns byte values for read"""
 
     def __init__(self, fileptr, password, mode=None):
         self._fileptr = fileptr
@@ -572,6 +574,10 @@ class ChiAsFile(object):
             return self._bufferedfileptr.read(size)
 
     def seek(self, offset):  # FIXME `whence` support
+        if self._mode != 'r':
+            raise IOError(
+                'seek issued for non-read operation'
+            )
         return self._bufferedfileptr.seek(offset)
 
     def write(self, str_of_bytes):
