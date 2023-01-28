@@ -39,6 +39,25 @@ To get started:
 
 ## Examples
 
+
+### In memory
+
+    Python 3.10.4 (tags/v3.10.4:9d38120, Mar 23 2022, 23:13:41) [MSC v.1929 64 bit (AMD64)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import chi_io  # https://github.com/clach04/chi_io Python access to Tombo encrypted files
+    >>> chi_io.implementation
+    'using PyCrypto 3.17'
+    >>> plain_text = b'12345678'
+    >>> mypassword = b'testing'
+    >>> cipher = chi_io.PEP272LikeCipher(chi_io.CHI_cipher(mypassword))  # OPTIONAL! encryption and decryption will be faster on subsequent calls if the same password
+     is used
+    >>> crypted_data = cipher.encrypt(plain_text)
+    >>> result_data = cipher.decrypt(crypted_data)
+    >>> assert plain_text == result_data
+
+
+### Using filenames
+
     Python 2.7.10 (default, May 23 2015, 09:40:32) [MSC v.1500 32 bit (Intel)] on win32
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import chi_io  # https://github.com/clach04/chi_io Python access to Tombo encrypted files
@@ -55,6 +74,7 @@ To get started:
     python chi_io.py some_existing_file.chi  # will be prompted for password to decrypt existing file
     env LANG=C.UTF-8 python chi_io.py some_existing_file.chi  # will be prompted for password to decrypt existing file
 
+NOTE write_encrypted_file() and read_encrypted_file() can take either file names or file-like objects.
 
 ## Tests
 
