@@ -47,6 +47,7 @@ To get started:
     >>> plain_text = b'12345678'
     >>> enc_fname = 'chi_io_test1.chi'
     >>> mypassword = b'testing'
+    >>> mypassword = chi_io.CHI_cipher(mypassword)  # OPTIONAL! encryption and decryption will be faster on subsequent calls if the same password is used
     >>> chi_io.write_encrypted_file(enc_fname, mypassword, plain_text)
     >>> read_plain_text = chi_io.read_encrypted_file(enc_fname, mypassword)
     >>> assert plain_text == read_plain_text
