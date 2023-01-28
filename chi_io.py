@@ -274,7 +274,7 @@ class PEP272LikeCipher():
             raise NotImplementedError('Tombo CHI files are ONLY (Blowfish) ECB mode')
 
         # Assume key is a plain text string (i.e. a byte string, not Unicode type)
-        self._key = CHI_cipher(key)  # FIXME performance issue here..
+        self._key = CHI_cipher(key)  # _key is actually the underlying (Blowfish) Cipher with Tombo derived password/key
 
     def decrypt(self, string):
         """Decrypts 'string', using the key-dependent data in the object and with the appropriate feedback mode. The string's length must be an exact multiple of the algorithm's block size or, in CFB mode, of the segment size. Returns a string containing the plaintext.
