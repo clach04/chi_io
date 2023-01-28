@@ -40,6 +40,7 @@ def main(argv=None):
     parser.add_option("-p", "--password", help="password, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-P", "--password_file", help="file name where password is to be read from, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-v", "--verbose", action="store_true")
+    parser.add_option("-s", "--silent", help="if specified do not warn about stdin using", action="store_false", default=True)
     (options, args) = parser.parse_args(argv[1:])
     #print('%r' % ((options, args),))
     verbose = options.verbose
@@ -72,8 +73,9 @@ def main(argv=None):
             in_file = sys.stdin.buffer
         else:
             in_file = sys.stdin
-        sys.stderr.write('Read in from stdin...')
-        sys.stderr.flush()
+        if options.silent:
+            sys.stderr.write('Read in from stdin...')
+            sys.stderr.flush()
         # TODO for py3 handle string versus bytes
     else:
         in_file = open(in_filename, 'rb')
