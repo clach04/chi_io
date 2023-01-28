@@ -19,7 +19,6 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-    note_encoding = 'utf-8'  # FIXME hard coded
     if is_py3:
         stream_encoding = 'utf-8'  # FIXME hard coded
 
@@ -37,6 +36,7 @@ def main(argv=None):
                         help="decrypt in_filename")
     parser.add_option("-e", "--encrypt", action="store_false", dest="decrypt",
                         help="encrypt in_filename")
+    parser.add_option("-c", "--codec", help="File encoding", default='utf-8')
     parser.add_option("-p", "--password", help="password, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-P", "--password_file", help="file name where password is to be read from, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-v", "--verbose", action="store_true")
@@ -64,6 +64,7 @@ def main(argv=None):
     password = options.password or os.environ.get('CHI_PASSWORD') or getpass.getpass("Password:")
     decrypt = options.decrypt
     out_filename = options.out_filename
+    note_encoding = options.codec
 
 
     password = password.encode('us-ascii')
