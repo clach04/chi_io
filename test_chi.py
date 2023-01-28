@@ -512,6 +512,45 @@ class TestCompatChiDecrypt(TestCompatChiData):
         )
 
 
+class TestCompatChiEncryptDecrypt(TestCompatChiData):
+    ## in memory equiv of TestChiIO.test_get_what_you_put_in()
+    ## TODO test_same_input_different_crypted_text()
+    def test_get_what_you_put_in(self):
+        test_data = b"this is just a small piece of text."
+        test_password = b'mypassword'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        crypted_data = cipher.encrypt(test_data)
+        result_data = cipher.decrypt(crypted_data)
+        self.assertEqual(test_data, result_data)
+
+    def test_get_what_you_put_in_larger(self):
+        test_data = self.plain_text_data
+        test_password = self.password
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        crypted_data = cipher.encrypt(test_data)
+        result_data = cipher.decrypt(crypted_data)
+        self.assertEqual(test_data, result_data)
+
+    def test_same_input_different_crypted_text(self):
+        test_data = b"this is just a small piece of text."
+        test_password = b'mypassword'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        crypted_data1 = cipher.encrypt(test_data)
+        crypted_data2 = cipher.encrypt(test_data)
+        self.assertNotEqual(crypted_data1, crypted_data2)
+
+        result_data = cipher.decrypt(crypted_data1)
+        self.assertEqual(test_data, result_data)
+        result_data = cipher.decrypt(crypted_data2)
+        self.assertEqual(test_data, result_data)
+
+
 if __name__ == '__main__':
     print(sys.version)
     print(chi_io.implementation)
