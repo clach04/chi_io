@@ -274,6 +274,8 @@ class TestCompatChiData(TestChiIOUtil):
     ## Test that can read files generated from Windows Tombo
     ## http://tombo.sourceforge.jp/En/
 
+    password = b'password'
+
     ## encrypted data taken from Win32 Tombo
     ## password for below data is: 'password'
     binary_data = b'BF01\xe6\x05\x00\x00\xb2\xdfB\xf2\x9d-]\x89c\x92|.\xae\x88\xaa\x96Oi\
@@ -378,12 +380,12 @@ class TestCompatChiIO(TestCompatChiData):
         self.assertEqual(expected_plain_text_data, result_data)
 
     def test_win32_compat_fileread(self):
-        test_password = b'password'
+        test_password = self.password
 
         self.do_fileread(self.binary_data, test_password, self.plain_text_data)
 
     def test_seek_fileread(self):
-        test_password = b'password'
+        test_password = self.password
 
         crypted_data = self.binary_data
         expected_plain_text_data = self.plain_text_data[30:]
