@@ -484,17 +484,15 @@ class TestCompatChiDecrypt(TestCompatChiData):
         cipher = chi_io.PEP272LikeCipher(test_password)
 
         self.assertRaises(
-            RuntimeError,
+            chi_io.UnsupportedFile,
             cipher.decrypt,
             test_data
         )
-        """FIXME consider using (new) exception based on chi_io.ChiIO - or even just use UnsupportedFile
         self.assertRaises(
             chi_io.ChiIO,  # base exception for CHI
             cipher.decrypt,
             test_data
         )
-        """
 
     def test_in_memory_decrypt_badinput_validstart_extra(self):
         test_password = b'badpassword'
@@ -503,17 +501,15 @@ class TestCompatChiDecrypt(TestCompatChiData):
         cipher = chi_io.PEP272LikeCipher(test_password)
 
         self.assertRaises(
-            RuntimeError,
+            chi_io.UnsupportedFile,
             cipher.decrypt,
             test_data
         )
-        """FIXME consider using (new) exception based on chi_io.ChiIO - or even just use UnsupportedFile
         self.assertRaises(
             chi_io.ChiIO,  # base exception for CHI
             cipher.decrypt,
             test_data
         )
-        """
 
 
 if __name__ == '__main__':

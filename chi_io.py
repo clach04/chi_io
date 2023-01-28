@@ -284,7 +284,7 @@ class PEP272LikeCipher():
         Returns bytes
         NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI so complete file contents should be pass in"""
 
-        # NOTE this code is almost identical to the code currently in read_encrypted_file()
+        # NOTE this code is almost identical to the code currently in read_encrypted_file(), difference is ChiIO exceptions are should catch all issues - RunTime exception is not raised unlike read_encrypted_file() for some bad inputs
 
         encrypted_bytes = string  # I hate the name in the pep, conflicts with stdlib :-(
 
@@ -337,7 +337,7 @@ class PEP272LikeCipher():
         if mycounter > 0:
             # This should not happen if it did this may be a corrupted file
             # at present not handled, pending on bugs found here
-            raise RuntimeError('ExtraBytesFound during decryption')
+            raise UnsupportedFile('ExtraBytesFound during decryption')
         if is_py3:
             decrypted_data = bytes(decrypted_data)
         else:  # py2
