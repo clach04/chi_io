@@ -270,14 +270,9 @@ class TestChiIO(TestChiIOUtil):
         self.assertEqual(b"text is just a small piece of text.", result_data)
 
 
-class TestCompatChiIO(TestChiIOUtil):
+class TestCompatChiData(TestChiIOUtil):
     ## Test that can read files generated from Windows Tombo
     ## http://tombo.sourceforge.jp/En/
-    def do_fileread(self, crypted_data, test_password, expected_plain_text_data):
-        fileptr2 = FakeFile(crypted_data)
-        chi_fileptr = chi_io.ChiAsFile(fileptr2, test_password)
-        result_data = chi_fileptr.read()
-        self.assertEqual(expected_plain_text_data, result_data)
 
     ## encrypted data taken from Win32 Tombo
     ## password for below data is: 'password'
@@ -371,6 +366,16 @@ king; one that will really rule over us." Now this made Jove angr\
 y, so he sent among them a big Stork that soon set to work gobbli\
 ng them all up. Then the Frogs repented when too late.\r\n\r\nBet\
 ter no rule than cruel rule.\r\n'''
+
+
+class TestCompatChiIO(TestCompatChiData):
+    ## Test file IO
+
+    def do_fileread(self, crypted_data, test_password, expected_plain_text_data):
+        fileptr2 = FakeFile(crypted_data)
+        chi_fileptr = chi_io.ChiAsFile(fileptr2, test_password)
+        result_data = chi_fileptr.read()
+        self.assertEqual(expected_plain_text_data, result_data)
 
     def test_win32_compat_fileread(self):
         test_password = b'password'
