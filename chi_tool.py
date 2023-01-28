@@ -58,7 +58,7 @@ def main(argv=None):
         # no filename specified so default to stdin
         in_filename = '-'
 
-    password = options.password or getpass.getpass("Password:")
+    password = options.password or os.environ.get('CHI_PASSWORD') or getpass.getpass("Password:")
     decrypt = options.decrypt
     out_filename = options.out_filename
 
