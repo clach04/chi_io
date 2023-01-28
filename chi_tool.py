@@ -94,7 +94,10 @@ def main(argv=None):
         if decrypt:
             #import pdb ; pdb.set_trace()
             plain_str = chi_io.read_encrypted_file(in_file, password)
-            out_file.write(plain_str)  # FIXME how to write bytes to stdout in python 3? Disable this option/feature for Python3?
+            if is_py3:
+                # encode to stdout encoding  TODO make this optional, potentially useful for py2 too
+                plain_str = plain_str.decode(note_encoding).encode(stream_encoding)
+            out_file.write(plain_str)
         else:
             # encrypt
             plain_text = in_file.read()
