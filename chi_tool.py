@@ -19,7 +19,9 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
 
-    note_encoding = 'utf-8' # FIXME hard coded
+    note_encoding = 'utf-8'  # FIXME hard coded
+    if is_py3:
+        stream_encoding = 'utf-8'  # FIXME hard coded
 
     verbose = True
     verbose = False
@@ -66,12 +68,20 @@ def main(argv=None):
     password = password.encode('us-ascii')
 
     if in_filename == '-':
-        in_file = sys.stdin
-        # handle string versus bytes....?
+        if is_py3:
+            in_file = sys.stdin.buffer
+        else:
+            in_file = sys.stdin
+        sys.stderr.write('Read in from stdin...')
+        sys.stderr.flush()
+        # TODO for py3 handle string versus bytes
     else:
         in_file = open(in_filename, 'rb')
     if out_filename == '-':
-        out_file = sys.stdout
+        if is_py3:
+            out_file = sys.stdout.buffer
+        else:
+            out_file = sys.stdout
         # handle string versus bytes....?
     else:
         out_file = open(out_filename, 'wb')
@@ -81,13 +91,10 @@ def main(argv=None):
         if decrypt:
             #import pdb ; pdb.set_trace()
             plain_str = chi_io.read_encrypted_file(in_file, password)
-            if is_py3:
-                plain_str = plain_str.decode(note_encoding)
-            out_file.write(plain_str)
+            out_file.write(plain_str)  # FIXME how to write bytes to stdout in python 3? Disable this option/feature for Python3?
         else:
             # encrypt
-            # TODO read plain_text
-            plain_text = in_file.read()  # FIXME what about stdin which is string...
+            plain_text = in_file.read()
             chi_io.write_encrypted_file(out_file, password, plain_text)
             failed = False
     except chi_io.BadPassword as info:
