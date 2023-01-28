@@ -254,6 +254,131 @@ def CHI_cipher(password):
         cipher = TheBlowfishCipher(md5key)
     return cipher
 
+MODE_ECB = 1  #  Electronic Code Book - https://peps.python.org/pep-0272/#introduction
+class PEP272LikeCipher():
+    """PEP-272 Like... This is non-confirming:
+      * no new() method, all input controlled via class constructor
+      * mode is optional and can be omitted
+          * Tombo / CHI is a set format so can't allow changing the mode!
+    https://peps.python.org/pep-0272/
+    ideas:
+        ignore the options silently?
+    """
+
+    # block_size - not implemented
+    # IV - not implemented - IV handled imnternally - TODO support this? not needed for Tombo compat.
+
+    #def __init__(self, key, mode, IV=None, **kwargs):  # silently ignore params not implemented
+    def __init__(self, key, mode=MODE_ECB):
+        if mode != MODE_ECB:
+            raise NotImplementedError('Tombo CHI files are ONLY (Blowfish) ECB mode')
+
+        # Assume key is a plain text string (i.e. a byte string, not Unicode type)
+        self._key = CHI_cipher(key)  # FIXME performance issue here..
+
+    def decrypt(self, string):
+        """Decrypts 'string', using the key-dependent data in the object and with the appropriate feedback mode. The string's length must be an exact multiple of the algorithm's block size or, in CFB mode, of the segment size. Returns a string containing the plaintext.
+        encrypt(string)
+
+        NOTE string is BYTES!
+        Returns bytes
+        NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI so complete file contents should be pass in"""
+
+        # NOTE this code is almost identical to the code currently in read_encrypted_file()
+
+        encrypted_bytes = string  # I hate the name in the pep, conflicts with stdlib :-(
+
+        # FIXME the slicing and new list creations!
+
+        # called version in CryptManager
+        header = encrypted_bytes[0:4]  # first 4 bytes
+        if header != b'BF01':
+            raise UnsupportedFile('not a Tombo *.chi file')
+
+        # read in 4 bytes and convert into an integer value
+        ## NOTE may need to worry about byte swap on big-endian hardware
+        # TODO do we need array lookup if we do not intend to byte swap???
+        tmpbuf = encrypted_bytes[4:8]  # next 4 bytes
+        # dump_bytes(tmpbuf)
+        xx = array.array(FMT_ARRAY_4BYTE, tmpbuf)
+        (enc_len,) = struct.unpack(FMT_STRUCT_4BYTE, xx)
+        # TODO consider replacing above with:
+        # (enc_len,) = struct.unpack(FMT_STRUCT_4BYTE, tmpbuf)
+
+        enc_data = encrypted_bytes[8:]  # rest of the bytes
+        encbuf_len = len(enc_data)
+        # print 'read in %d bytes, of that only %d byte(s) are real data' % (encbuf_len , enc_len)
+
+        cipher = self._key
+
+        mycounter = encbuf_len
+        decrypted_data = []
+        second_pass = list(b"BLOWFISH")
+        while mycounter >= 8:
+            data = enc_data[:8]
+            chipher = data
+            enc_data = enc_data[8:]
+            data = cipher.decrypt(data)
+            ## based on debug code (and tombo specific additions to blowfish.c) in Tombo
+            ## Tombo is using the base blowfish algorithm AND then applies more bit fiddling....
+            ## performs bitwise exclusive-or on decrypted text from blowfish and "BLOWFISH" (note this static gets modified....)
+            for x in range(8):
+                tmp_byte_a = data[x]
+                tmp_byte_b = second_pass[x]
+                if not is_py3:  # py2
+                    tmp_byte_a = ord(tmp_byte_a)
+                    tmp_byte_b = ord(tmp_byte_b)
+
+                decrypted_data.append(tmp_byte_a ^ tmp_byte_b)
+                second_pass[x] = chipher[x]
+            mycounter = mycounter - 8
+        ## there should be no bytes left after this.
+        ## Ignore any remaining bytes (less than 8)?
+        if mycounter > 0:
+            # This should not happen if it did this may be a corrupted file
+            # at present not handled, pending on bugs found here
+            raise RuntimeError('ExtraBytesFound during decryption')
+        if is_py3:
+            decrypted_data = bytes(decrypted_data)
+        else:  # py2
+            decrypted_data = map(chr, decrypted_data)
+            decrypted_data = b''.join(decrypted_data)
+        """
+        At this point decrypted_data contains:
+            8 bytes of (unknown) random data
+            16 bytes of an md5sum of the unencrypted data
+            enc_len * bytes of unencrypted data
+
+        But at this point we do not know if the password that was used was correct,
+        the unencrypted data could be garbage!
+        """
+
+        # extract real text from supuriuos crap (24 bytes on from started of data)
+        # loose spurious end use real data length we read earlier?
+        unencrypted_str = decrypted_data[24:]
+        unencrypted_str = unencrypted_str[:enc_len]
+
+        m = md5checksum()
+        m.update(unencrypted_str)
+        decriptsum = m.digest()
+        chi_md5sum = decrypted_data[8:]
+        chi_md5sum = chi_md5sum[:16]
+
+        if chi_md5sum == decriptsum:
+            # passwords match, so data is valid
+            return unencrypted_str
+        else:
+            # password did not match, data is bogus
+            raise BadPassword('for %r' % ('in-memory-buffer'))
+
+    def encrypt(self, string):
+        """Encrypts a non-empty string, using the key-dependent data in the object, and with the appropriate feedback mode. The string's length must be an exact multiple of the algorithm's block size or, in CFB mode, of the segment size. Returns a string containing the ciphertext.
+
+        NOTE string is BYTES!
+        Returns bytes
+        NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI so complete file contents should be pass in"""
+        raise NotImplementedError('yet....')
+
 
 def read_encrypted_file(fileinfo, password):
     """Reads a *.chi file encrypted by Tombo. Returns (8 bit) string containing plaintext.

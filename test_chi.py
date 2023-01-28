@@ -414,6 +414,107 @@ class TestCompatChiIO(TestCompatChiData):
             self.plain_text_data,
         )
 
+class TestCompatChiDecrypt(TestCompatChiData):
+    ## Test file IO
+
+    # TODO clone approach in TestCompatChiIO
+
+    def test_in_memory_decrypt(self):
+        test_password = self.password
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        result_data = cipher.decrypt(self.binary_data)
+        self.assertEqual(self.plain_text_data, result_data)
+
+    def test_in_memory_decrypt_badpassword(self):
+        test_password = b'badpassword'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        self.assertRaises(
+            chi_io.BadPassword,
+            cipher.decrypt,
+            self.binary_data
+        )
+        self.assertRaises(
+            chi_io.ChiIO,  # base exception for CHI
+            cipher.decrypt,
+            self.binary_data
+        )
+
+    def test_in_memory_decrypt_badinput_empty(self):
+        test_password = b'badpassword'
+        test_data = b''
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        self.assertRaises(
+            chi_io.UnsupportedFile,
+            cipher.decrypt,
+            test_data
+        )
+        self.assertRaises(
+            chi_io.ChiIO,  # base exception for CHI
+            cipher.decrypt,
+            test_data
+        )
+
+    def test_in_memory_decrypt_badinput_junk(self):
+        test_password = b'badpassword'
+        test_data = b'JUNKDATEHEREAS'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        self.assertRaises(
+            chi_io.UnsupportedFile,
+            cipher.decrypt,
+            test_data
+        )
+        self.assertRaises(
+            chi_io.ChiIO,  # base exception for CHI
+            cipher.decrypt,
+            test_data
+        )
+
+    def test_in_memory_decrypt_badinput_valid_bf01(self):
+        test_password = b'badpassword'
+        test_data = b'BF01JUNKDATEHEREAS'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        self.assertRaises(
+            RuntimeError,
+            cipher.decrypt,
+            test_data
+        )
+        """FIXME consider using (new) exception based on chi_io.ChiIO - or even just use UnsupportedFile
+        self.assertRaises(
+            chi_io.ChiIO,  # base exception for CHI
+            cipher.decrypt,
+            test_data
+        )
+        """
+
+    def test_in_memory_decrypt_badinput_validstart_extra(self):
+        test_password = b'badpassword'
+        test_data = self.binary_data + b'BF01JUNKDATEHEREAS'
+
+        cipher = chi_io.PEP272LikeCipher(test_password)
+
+        self.assertRaises(
+            RuntimeError,
+            cipher.decrypt,
+            test_data
+        )
+        """FIXME consider using (new) exception based on chi_io.ChiIO - or even just use UnsupportedFile
+        self.assertRaises(
+            chi_io.ChiIO,  # base exception for CHI
+            cipher.decrypt,
+            test_data
+        )
+        """
+
 
 if __name__ == '__main__':
     print(sys.version)
