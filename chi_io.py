@@ -470,7 +470,7 @@ class PEP272LikeCipher():
                 data = ''.join(tmp_buf)
 
             # Tombo bit fiddling
-            # NOTE in Tobo the "fake" padding bytes at the end are not bit fiddled with
+            # NOTE in Tombo the "fake" padding bytes at the end are not bit fiddled with
             plain = []
             for x in range(mycounter):
                 tmp_byte_a = data[x]
