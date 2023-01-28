@@ -263,6 +263,8 @@ class PEP272LikeCipher():
     https://peps.python.org/pep-0272/
     ideas:
         ignore the options silently?
+
+    Cipher PEP 272 API for Block Encryption Algorithms v1.0 https://www.python.org/dev/peps/pep-0272/
     """
 
     # block_size - not implemented
