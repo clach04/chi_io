@@ -38,7 +38,7 @@ def main(argv=None):
                         help="encrypt in_filename")
     parser.add_option("-c", "--codec", help="File encoding", default='utf-8')
     parser.add_option("-p", "--password", help="password, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
-    parser.add_option("-P", "--password_file", help="file name where password is to be read from, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
+    parser.add_option("-P", "--password_file", help="file name where password is to be read from, trailing blanks are ignored")
     parser.add_option("-v", "--verbose", action="store_true")
     parser.add_option("-s", "--silent", help="if specified do not warn about stdin using", action="store_false", default=True)
     (options, args) = parser.parse_args(argv[1:])
@@ -61,13 +61,20 @@ def main(argv=None):
         # no filename specified so default to stdin
         in_filename = '-'
 
-    password = options.password or os.environ.get('CHI_PASSWORD') or getpass.getpass("Password:")
+    if options.password_file:
+        f = open(options.password_file, 'rb')
+        password_file = f.read()
+        f.close()
+        password_file = password_file.strip()
+    else:
+        password_file = None
+    password = options.password or password_file or os.environ.get('CHI_PASSWORD') or getpass.getpass("Password:")
     decrypt = options.decrypt
     out_filename = options.out_filename
     note_encoding = options.codec
 
-
-    password = password.encode('us-ascii')
+    if not isinstance(password, bytes):
+        password = password.encode('us-ascii')
 
     if in_filename == '-':
         if is_py3:
