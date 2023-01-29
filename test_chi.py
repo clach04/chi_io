@@ -54,18 +54,17 @@ Present are tests that make calls to:
   * chi_io.write_encrypted_file()
   * chi_io.read_encrypted_file()
   * chi_io.ChiAsFile class
+  * chi_io.CHI_cipher() (explicit and implicit called by read_encrypted_file() and write_encrypted_file())
 
 NOTE this does not mean exhaustive tests ;-)
 
 No explicit tests for:
 
-  * read_encrypted_file() - called by ChiAsFile.read()
-  * write_encrypted_file() - called by ChiAsFile.write() and close()
-  * CHI_cipher() - called by read_encrypted_file() and write_encrypted_file()
+  * ??
 
 """
 
-class TestChiIOUtil(unittest.TestCase):
+class TestChiIOBase(unittest.TestCase):
     def skip(self, reason):
         """Skip current test because of `reason`.
 
@@ -86,7 +85,33 @@ class TestChiIOUtil(unittest.TestCase):
             # raise Exception(reason)
 
 
-class TestChiIO(TestChiIOUtil):
+class TestChiIOUtil(TestChiIOBase):
+    ## test util functions
+    def test_password_ascii_bytes(self):
+        test_password = b'mypassword'
+        result = chi_io.CHI_cipher(test_password)
+        self.assertTrue(isinstance(result, chi_io.TheBlowfishClass))  # TODO review is this a reasonable self.assert call?
+
+    def test_password_ascii_string(self):
+        test_password = 'mypassword'
+        result = chi_io.CHI_cipher(test_password)
+        self.assertTrue(isinstance(result, chi_io.TheBlowfishClass))
+
+    def test_password_ascii_unicode(self):
+        test_password = u'mypassword'
+        result = chi_io.CHI_cipher(test_password)
+        self.assertTrue(isinstance(result, chi_io.TheBlowfishClass))
+
+    def test_password_nonascii_unicode(self):
+        test_password = u'YEN SIGN \u00A5'
+        self.assertRaises(
+            chi_io.ChiIO,
+            chi_io.CHI_cipher,
+            test_password
+        )
+
+
+class TestChiIO(TestChiIOBase):
     def test_get_what_you_put_in(self):
         test_data = b"this is just a small piece of text."
         test_password = b'mypassword'
@@ -270,7 +295,7 @@ class TestChiIO(TestChiIOUtil):
         self.assertEqual(b"text is just a small piece of text.", result_data)
 
 
-class TestCompatChiData(TestChiIOUtil):
+class TestCompatChiData(TestChiIOBase):
     ## Test that can read files generated from Windows Tombo
     ## http://tombo.sourceforge.jp/En/
 

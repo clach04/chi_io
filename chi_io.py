@@ -247,6 +247,12 @@ def CHI_cipher(password):
     if isinstance(password, TheBlowfishClass):
         cipher = password
     else:
+        if not isinstance(password, bytes):
+            try:
+                password = password.encode('us-ascii')
+            except UnicodeEncodeError:
+                raise ChiIO('Only support 8-bit (binary/bytes) password (got %r). Encode first, see help(codecs).' % type(password))
+
         # Generate md5 sum of password, this is what is used as the encrypt key
         m = md5checksum()
         m.update(password)
