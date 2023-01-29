@@ -30,7 +30,19 @@ Assuming a local checkout:
 
 ## Examples
 
-TODO chi_tool.py usage
+
+### Command line tool chi_io
+
+    echo test | env CHI_PASSWORD=test ./chi_tool.py  -e -s  | env CHI_PASSWORD=test ./chi_tool.py -s -v
+
+    echo test | ./chi_tool.py -p test -e -s  | ./chi_tool.py -p test -s -v
+
+    mkdir scratch
+    echo my data | python chi_tool.py -p test -e -o scratch/mynote.chi
+    echo test > scratch/password
+    od -c scratch/password
+    ./chi_tool.py scratch/mynote.chi -P scratch/password
+
 
 ### Python code
 
