@@ -37,7 +37,7 @@ def main(argv=None):
     parser.add_option("-e", "--encrypt", action="store_false", dest="decrypt",
                         help="encrypt in_filename")
     parser.add_option("-c", "--codec", help="File encoding", default='utf-8')
-    parser.add_option("-p", "--password", help="password, if ommited but OS env CHI_PASSWORD is set use that, if missing prompt")
+    parser.add_option("-p", "--password", help="password, if omitted but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-P", "--password_file", help="file name where password is to be read from, trailing blanks are ignored")
     parser.add_option("-v", "--verbose", action="store_true")
     parser.add_option("-s", "--silent", help="if specified do not warn about stdin using", action="store_false", default=True)
