@@ -42,6 +42,7 @@ Assuming a local checkout:
     echo test > scratch/password
     od -c scratch/password
     ./chi_tool.py scratch/mynote.chi -P scratch/password
+    chi_tool.py scratch/mynote.chi | vim -  # decrypt a note and pipe into vim
 
 
 ### Python code
