@@ -189,13 +189,13 @@ except NameError:
 # Workaround Ubuntu/Debian/Linux 64-bit array bug
 x = array.array('L', [0])
 if x.itemsize == 4:
-    FMT_ARRAY_4BYTE = 'L'
-    FMT_STRUCT_4BYTE = '<L'
+    FMT_ARRAY_4BYTE = 'L'  # unsigned 4-bytes
+    FMT_STRUCT_4BYTE = '<L'  # unsigned 4-bytes little-endian
 else:
     x = array.array('I', [0])
     if x.itemsize == 4:
-        FMT_ARRAY_4BYTE = 'I'
-        FMT_STRUCT_4BYTE = '<L'
+        FMT_ARRAY_4BYTE = 'I'  # unsigned 4-bytes
+        FMT_STRUCT_4BYTE = '<L'  # unsigned 4-bytes little-endian
 del x
 
 
