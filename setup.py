@@ -26,7 +26,7 @@ else:
     long_description = None
 
 #exec(open(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'chi_io', '_version.py')).read())
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 setup(
     name='chi_io',

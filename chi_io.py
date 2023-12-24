@@ -634,6 +634,9 @@ def write_encrypted_file(fileinfo, password, plaintext):
     password is a (byte) string, i.e. not Unicode type
 
     """
+    cipher = PEP272LikeCipher(password)
+    crypted_data = cipher.encrypt(plaintext)
+
     assert isinstance(
         plaintext, bytes
     ), 'Only support 8 bit plaintext (got %r). Encode first, see help(codecs).' % type(
@@ -647,117 +650,6 @@ def write_encrypted_file(fileinfo, password, plaintext):
         # assume it is a file-like object
         enc_filename = None
 
-    plain_text_len = len(plain_text)
-    # print 'read in %d bytes' % plain_text_len
-
-    m = md5checksum()
-    m.update(plain_text)
-    plain_text_md5sum = m.digest()
-
-    # print "plain_text_md5sum"
-    # dump_bytes(plain_text_md5sum)
-
-    # Generate md5 sum of password, this is what is used as the encrypt key
-    cipher = CHI_cipher(password)
-
-    ## create new buffer that will be encrypted, contains:
-    ##  8 bytes of random (if this is NOT random, then a plaintext+password will always create the SAME encrypted text)
-    ##  16 bytes of md5 of plaintext
-    ##  plain_text_len bytes of plaintext
-    # str_to_encrypt = '12345678' + plain_text_md5sum + plain_text
-    # enc_data = '12345678' + plain_text_md5sum + plain_text
-    enc_data = gen_random_string(8) + plain_text_md5sum + plain_text
-
-    mycounter = len(enc_data)
-    encrypted_data = b''
-    second_pass = b"BLOWFISH"
-    while mycounter >= 8:
-        data = enc_data[:8]
-
-        ## based on debug code (and tombo specific additions to blowfish.c) in Tombo
-        ## tombo is using the base blowfish alogrithm AND then applies more bit fiddling....
-        ## performs bitwise exclusive or on decrypted text from blowfish and "BLOWFISH" (note this static gets modified....)
-        plain = []
-        for x in range(8):
-            tmp_byte_a = data[x]
-            tmp_byte_b = second_pass[x]
-            if not is_py3:
-                # py2
-                tmp_byte_a = ord(tmp_byte_a)
-                tmp_byte_b = ord(tmp_byte_b)
-            plain.append(tmp_byte_a ^ tmp_byte_b)
-        # print 'dec pass2 ', plain
-        if is_py3:
-            data = bytes(plain)
-        else:  # py2
-            data = map(chr, plain)
-            data = b''.join(data)
-        # print data
-        # dump_bytes(data)
-
-        enc_data = enc_data[8:]
-        ##debug
-        # first_byte = ord(data[0])
-        # print 'raw : %x, %d' %(first_byte , first_byte )
-        # dump_bytes(data)
-        data = cipher.encrypt(data)
-
-        # take encrypted block and shove into second pass but fiddler (really first pass when encrypting
-        second_pass = []
-        for x in range(8):
-            second_pass.append(data[x])
-        if is_py3:
-            second_pass = bytes(second_pass)
-        else:
-            second_pass = ''.join(second_pass)
-
-        ##debug
-        # first_byte = ord(data[0])
-        # print 'encrypted : %x, %d' %(first_byte , first_byte )
-        # print ""
-        encrypted_data = encrypted_data + data
-        mycounter = mycounter - 8
-    ## there maybe a few odd bytes left after this (less than 8). Take then and put with random bytes into an 8 byte block and encrypt that
-    if mycounter > 0:
-        # take  last few bytes "data"
-        tmp_buf = []
-        for x in range(mycounter):
-            tmp_buf.append(enc_data[x])
-        if is_py3:
-            data = bytes(tmp_buf)
-        else:
-            data = ''.join(tmp_buf)
-
-        # Tombo bit fiddling
-        # NOTE in Tobo the "fake" padding bytes at the end are not bit fiddled with
-        plain = []
-        for x in range(mycounter):
-            tmp_byte_a = data[x]
-            tmp_byte_b = second_pass[x]
-            if not is_py3:  # is py2
-                tmp_byte_a = ord(tmp_byte_a)
-                tmp_byte_b = ord(tmp_byte_b)
-            plain.append(tmp_byte_a ^ tmp_byte_b)
-        if is_py3:
-            data = plain
-        else:
-            data = map(chr, plain)
-
-        # pad the end few bytes so that blowfish can be applied
-        # just take "garbage" from begnning of (last/previously) encrypted block
-        # NOTE this differs from Tombo which takes the garbage from the end of the previously encrypted block
-        for x in range(8 - mycounter):
-            data.append(data[x])
-
-        if is_py3:
-            data = bytes(plain)
-        else:  # is py2
-            data = b''.join(data)
-
-        # Now encrypt
-        data = cipher.encrypt(data)
-        encrypted_data = encrypted_data + data
-
     ## file IO section
     if enc_filename is not None:
         out_file = open(enc_filename, 'wb')
@@ -765,17 +657,7 @@ def write_encrypted_file(fileinfo, password, plaintext):
         # assume it is a file-like object
         out_file = fileinfo
 
-    # called version in tombo's CryptManager
-    header = b'BF01'
-
-    out_file.write(header)
-
-    # write out 4 bytes - integer value containing unencrypted length of data
-    # write out plaintext length
-    out_file.write(struct.pack(FMT_STRUCT_4BYTE, plain_text_len))
-
-    # write out encrypted data
-    out_file.write(encrypted_data)
+    out_file.write(crypted_data)
 
     if enc_filename is not None:
         # i.e. we opened the file so we need to close it
