@@ -536,91 +536,20 @@ def read_encrypted_file(fileinfo, password):
         # enc_filename = in_file.name
         enc_filename = None
 
-    # called version in CryptManager
-    header = in_file.read(4)
-    if header != b'BF01':
-        raise UnsupportedFile('not a Tombo *.chi file')
-
-    # read in 4 bytes and convert into an integer value
-    ## NOTE may need to worry about byte swap on big-endian hardware
-    # TODO do we need array lookup if we do not intend to byte swap???
-    tmpbuf = in_file.read(4)
-    # dump_bytes(tmpbuf)
-    xx = array.array(FMT_ARRAY_4BYTE, tmpbuf)
-    (enc_len,) = struct.unpack(FMT_STRUCT_4BYTE, xx)
-    # TODO consider replacing above with:
-    # (enc_len,) = struct.unpack(FMT_STRUCT_4BYTE, tmpbuf)
-
-    enc_data = in_file.read()
-    encbuf_len = len(enc_data)
-    # print 'read in %d bytes, of that only %d byte(s) are real data' % (encbuf_len , enc_len)
-
-    # Assume it is a plain text string (i.e. a byte string, not Unicode type)
-    cipher = CHI_cipher(password)
-
-    mycounter = encbuf_len
-    decrypted_data = []
-    second_pass = list(b"BLOWFISH")
-    while mycounter >= 8:
-        data = enc_data[:8]
-        chipher = data
-        enc_data = enc_data[8:]
-        data = cipher.decrypt(data)
-        ## based on debug code (and tombo specific additions to blowfish.c) in Tombo
-        ## Tombo is using the base blowfish algorithm AND then applies more bit fiddling....
-        ## performs bitwise exclusive or on decrypted text from blowfish and "BLOWFISH" (note this static gets modified....)
-        for x in range(8):
-            tmp_byte_a = data[x]
-            tmp_byte_b = second_pass[x]
-            if not is_py3:  # py2
-                tmp_byte_a = ord(tmp_byte_a)
-                tmp_byte_b = ord(tmp_byte_b)
-
-            decrypted_data.append(tmp_byte_a ^ tmp_byte_b)
-            second_pass[x] = chipher[x]
-        mycounter = mycounter - 8
-    ## there should be no bytes left after this.
-    ## Ignore any remaining bytes (less than 8)?
-    if mycounter > 0:
-        # This should not happen if it did this may be a corrupted file
-        # at present not handled, pending on bugs found here
-        raise RuntimeError('ExtraBytesFound during decryption')
-    if is_py3:
-        decrypted_data = bytes(decrypted_data)
-    else:  # py2
-        decrypted_data = map(chr, decrypted_data)
-        decrypted_data = b''.join(decrypted_data)
-    """
-    At this point decrypted_data contains:
-        8 bytes of (unknown) random data
-        16 bytes of an md5sum of the unencrypted data
-        enc_len * bytes of unencrypted data
-    
-    But at this point we do not know if the password that was used was correct,
-    the unencrypted data could be garbage!
-    """
-
-    # extract real text from supuriuos crap (24 bytes on from started of data)
-    # loose spurious end use real data length we read earlier?
-    unencrypted_str = decrypted_data[24:]
-    unencrypted_str = unencrypted_str[:enc_len]
-
-    m = md5checksum()
-    m.update(unencrypted_str)
-    decriptsum = m.digest()
-    chi_md5sum = decrypted_data[8:]
-    chi_md5sum = chi_md5sum[:16]
-
+    crypted_data = in_file.read()  # need to read entire file
     if enc_filename:
         in_file.close()
 
-    if chi_md5sum == decriptsum:
-        # passwords match, so data is valid
-        return unencrypted_str
-    else:
+    cipher = PEP272LikeCipher(password)
+    try:
+        unencrypted_str = cipher.decrypt(crypted_data)
+    except BadPassword:
         # password did not match, data is bogus
         # raise exception WITH information such as filename, do not dump out password as that could be a security hole
+        # FIXME tests do not detect if this extra information is missing
         raise BadPassword('for %r' % (enc_filename or 'file-like-object'))
+
+    return unencrypted_str
 
 
 def write_encrypted_file(fileinfo, password, plaintext):
