@@ -547,7 +547,7 @@ def read_encrypted_file(fileinfo, password):
         # password did not match, data is bogus
         # raise exception WITH information such as filename, do not dump out password as that could be a security hole
         # FIXME tests do not detect if this extra information is missing
-        raise BadPassword('for %r' % (enc_filename or 'file-like-object'))
+        raise BadPassword('Incorrect password for %r' % (enc_filename or 'file-like-object'))
 
     return unencrypted_str
 
