@@ -1,6 +1,6 @@
 # chi_io
 
-Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this (there a more modern and better best-practices available since 2004), this is intended to be **compatible** with [Tombo](http://tombo.osdn.jp/En/), Kumagusu, MiniNoteViewer, etc.
+Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this (there a more modern and better best-practices available since 2004), this is intended to be **compatible** with [Tombo](http://tombo.osdn.jp/En/), Kumagusu, MiniNoteViewer, etc. Tomboy chi files are encrypted with blowfish and thus vulnerable to a [32-bit Birthday Attack](https://sweet32.info/).
 
 https://github.com/clach04/chi_io
 
