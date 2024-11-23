@@ -154,8 +154,8 @@ Copy and paste from Src/CryptManager.cpp:
   * 4-bytes little-endian : `plaintext_length` : length of the actual plaintext (C++ comment is incorrect/misleading)
   * encrypted payload : `encrypted_bytes` : blowfish encrypted payload, needs to be decrypted and once decypted contains:
       * 8-bytes little-endian : `random_iv` : Random IV bytes
-      * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext
-      * remained bytes of `plaintext_length` length : `plaintext` : plain text
+      * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, essentially Authenticate Then Encrypt
+      * `plaintext_length`-bytes : `plaintext` : plain text. NOTE possible padding on the end AFTER `plaintext_length`
 
 See code for both the KDF and the cipher implementation (and padding), Blowfish (64-bit blocks) are used with additional block shuffling.
 
