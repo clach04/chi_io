@@ -15,13 +15,17 @@ Can be used standalone, used by Puren Tonbo https://github.com/clach04/puren_ton
 
   * [Getting Started](#getting-started)
   * [Examples](#examples)
+    + [Command line tool chi_io](#command-line-tool-chi-io)
     + [Python code](#python-code)
       - [In memory](#in-memory)
       - [Using filenames](#using-filenames)
   * [Tests](#tests)
   * [NOTES](#notes)
   * [Also see](#also-see)
+  * [File format specification](#file-format-specification)
   * [TODO](#todo)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
 
 ## Getting Started
