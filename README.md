@@ -146,6 +146,15 @@ Copy and paste from Src/CryptManager.cpp:
 
     // '*' is encrypted.
 
+  * 4-bytes : `version` : fixed to "BF01". No other value is valid.
+  * 4-bytes little-endian : `plaintext_length` : length of the actual plaintext (C++ comment is incorrect/misleading)
+  * encrypted payload : `encrypted_bytes` : blowfish encrypted payload, needs to be decrypted and once decypted contains:
+      * 8-bytes little-endian : `random_iv` : Random IV bytes
+      * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext
+      * remained bytes of `plaintext_length` length : `plaintext` : plain text
+
+See code for both the KDF and the cipher implementation (and padding), Blowfish (64-bit blocks) are used with additional block shuffling.
+
 ## TODO
 
   * Refactor chi_io code

@@ -300,6 +300,7 @@ class PEP272LikeCipher():
 
         # called version in CryptManager
         header = encrypted_bytes[0:4]  # first 4 bytes
+        #print('DEBUG: header %r' % (header,))
         if header != b'BF01':
             raise UnsupportedFile('not a Tombo *.chi file')
 
@@ -307,15 +308,18 @@ class PEP272LikeCipher():
         ## NOTE may need to worry about byte swap on big-endian hardware
         # TODO do we need array lookup if we do not intend to byte swap???
         tmpbuf = encrypted_bytes[4:8]  # next 4 bytes
+        #print('DEBUG: tmpbuf %r' % (header,))
         # dump_bytes(tmpbuf)
         xx = array.array(FMT_ARRAY_4BYTE, tmpbuf)
         (enc_len,) = struct.unpack(FMT_STRUCT_4BYTE, xx)
         # TODO consider replacing above with:
         # (enc_len,) = struct.unpack(FMT_STRUCT_4BYTE, tmpbuf)
+        #print('DEBUG: enc_len %r' % (enc_len,))
 
         enc_data = encrypted_bytes[8:]  # rest of the bytes
         encbuf_len = len(enc_data)
-        # print 'read in %d bytes, of that only %d byte(s) are real data' % (encbuf_len , enc_len)
+        # print('read in %d bytes, of that only %d byte(s) are real data' % (encbuf_len , enc_len))
+        #print('DEBUG: enc_data %r %r' % (len(enc_data), enc_data,))
 
         cipher = self._key
 
@@ -324,8 +328,11 @@ class PEP272LikeCipher():
         second_pass = list(b"BLOWFISH")
         while mycounter >= 8:
             data = enc_data[:8]
+            #print('')
+            #print('DEBUG: loop data %r %r' % (len(data), data,))
             chipher = data
             enc_data = enc_data[8:]
+            #print('DEBUG: loop enc_data %r %r' % (len(enc_data), enc_data,))
             data = cipher.decrypt(data)
             ## based on debug code (and tombo specific additions to blowfish.c) in Tombo
             ## Tombo is using the base blowfish algorithm AND then applies more bit fiddling....
