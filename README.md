@@ -135,7 +135,7 @@ Compatible with:
 
 ## File format specification
 
-Copy and paste from Src/CryptManager.cpp:
+Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob/my_changes/Src/CryptManager.cpp):
 
     //////////////////////////////////////////////////
     // Encrypt data and add header
