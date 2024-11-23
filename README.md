@@ -1,3 +1,5 @@
+-- coding: utf-8 --
+
 # chi_io
 
 Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this (there a more modern and better best-practices available since 2004), this is intended to be **compatible** with [Tombo](http://tombo.osdn.jp/En/), Kumagusu, MiniNoteViewer, etc. Tombo chi files are encrypted with blowfish and thus vulnerable to a [32-bit Birthday Attack](https://sweet32.info/).
@@ -126,6 +128,23 @@ Compatible with:
        * https://osdn.net/cvs/view/tombo/Tombo/contrib/TomboCrypt/ - source code in CVS
        * NOTE this Python chi_io library is the closest to this, as it is Python it is portable and works anywhere there is Python (know to work on intel Windows and Linux, along with arm both 32-bit and 64-bit Linux)
 
+
+## File format specification
+
+Copy and paste from Src/CryptManager.cpp:
+
+    //////////////////////////////////////////////////
+    // Encrypt data and add header
+    //////////////////////////////////////////////////
+    // CryptManagerによる暗号化ファイルのフォーマット
+    // The format of the container is:
+    // 0-3  : BF01(4 bytes)
+    // 4-7  : data length (include randum area + md5sum)(4 bytes)
+    // 8-15 :* random data(8 bytes)
+    //16-31 :* md5sum of plain text(16 bytes)
+    //32-   :* data
+
+    // '*' is encrypted.
 
 ## TODO
 
