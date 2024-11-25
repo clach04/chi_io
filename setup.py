@@ -26,8 +26,8 @@ PyPi:
 
 readme_filename = 'README.md'
 if os.path.exists(readme_filename):
-    f = open(readme_filename)
-    long_description = f.read()
+    f = open(readme_filename, 'rb')
+    long_description = f.read().decode('utf-8')
     f.close()
 else:
     long_description = None
