@@ -54,6 +54,7 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
+        'Topic :: Security :: Cryptography',
         # FIXME TODO more
         ],
     platforms='any',  # or distutils.util.get_platform()
