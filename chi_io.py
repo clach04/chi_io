@@ -19,9 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-chi I/O module
+chi/chs I/O module
 
-Reads Writes encrypted Tombo *.chi
+Reads Writes encrypted Tombo *.chi / *.chs
 
 NOTE: if you want to read notes in Tombo that where generated with
 this module, ensure to send in strings to write_encrypted_file()
@@ -223,7 +223,7 @@ def swap_bytes(s):
 
 
 class ChiIO(Exception):
-    '''Base chi I/O exception'''
+    '''Base chi/chs I/O exception'''
 
 
 class BadPassword(ChiIO):
@@ -265,7 +265,7 @@ class PEP272LikeCipher():
     """PEP-272 Like... This is non-confirming:
       * no new() method, all input controlled via class constructor
       * mode is optional and can be omitted
-          * Tombo / CHI is a set format so can't allow changing the mode!
+          * Tombo / CHI / CHS is a set format so can't allow changing the mode!
     https://peps.python.org/pep-0272/
     ideas:
         ignore the options silently?
@@ -279,7 +279,7 @@ class PEP272LikeCipher():
     #def __init__(self, key, mode, IV=None, **kwargs):  # silently ignore params not implemented
     def __init__(self, key, mode=MODE_ECB):
         if mode != MODE_ECB:
-            raise NotImplementedError('Tombo CHI files are ONLY (Blowfish) ECB mode')
+            raise NotImplementedError('Tombo CHI/CHS files are ONLY (Blowfish) ECB mode')
 
         # Assume key is a plain text string (i.e. a byte string, not Unicode type)
         self._key = CHI_cipher(key)  # _key is actually the underlying (Blowfish) Cipher with Tombo derived password/key
@@ -290,7 +290,7 @@ class PEP272LikeCipher():
 
         NOTE string is BYTES!
         Returns bytes
-        NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI so complete file contents should be pass in"""
+        NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI/CHS so complete file contents should be pass in"""
 
         # NOTE this code is almost identical to the code currently in read_encrypted_file(), difference is ChiIO exceptions are should catch all issues - RunTime exception is not raised unlike read_encrypted_file() for some bad inputs
 
@@ -302,7 +302,7 @@ class PEP272LikeCipher():
         header = encrypted_bytes[0:4]  # first 4 bytes
         #print('DEBUG: header %r' % (header,))
         if header != b'BF01':
-            raise UnsupportedFile('not a Tombo *.chi file')
+            raise UnsupportedFile('not a Tombo *.chi/*.chs file')
 
         # read in 4 bytes and convert into an integer value
         ## NOTE may need to worry about byte swap on big-endian hardware
@@ -391,7 +391,7 @@ class PEP272LikeCipher():
 
         NOTE string is BYTES!
         Returns bytes
-        NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI so complete file contents should be pass in
+        NOTE does NOT require padding, padding logic is built in as this is ONLY for Tombo CHI/CHS so complete file contents should be pass in
 
         NOTE: if notes created with this routine are to be read in Tombo
         ensure to send in plaintext strings with Windows style newlines;
@@ -524,7 +524,7 @@ class PEP272LikeCipher():
 
 
 def read_encrypted_file(fileinfo, password):
-    """Reads a *.chi file encrypted by Tombo. Returns (8 bit) string containing plaintext.
+    """Reads a *.chi / *.chs file encrypted by Tombo. Returns (8 bit) string containing plaintext.
     Raises exceptions on failure.
 
     fileinfo is either a filename (string) or a file-like object that reads binary bytes that be can read (caller is responsible for closing)
@@ -560,7 +560,7 @@ def read_encrypted_file(fileinfo, password):
 
 
 def write_encrypted_file(fileinfo, password, plaintext):
-    """Writes an encrypted *.chi file that could be read by Tombo. Parameter plaintext should be 8 bit string.
+    """Writes an encrypted *.chi / *.chs file that could be read by Tombo. Parameter plaintext should be 8 bit string.
     Raises exceptions on failure (so caller is responsible for cleaning up incomplete out files).
     NOTE: if notes created with this routine are to be read in Tombo
     ensure to send in plaintext strings with Windows style newlines;
@@ -609,7 +609,7 @@ def dumb_unix2dos(in_str):
 
 ## Consider using filelike from http://cheeseshop.python.org/pypi/filelike/
 class ChiAsFile(object):
-    """File like object around CHI encrypted files for reading and writing.
+    """File like object around CHI/CHS encrypted files for reading and writing.
     Partial seek() support for read operations ONLY.
     Currently expects byte values for write and returns byte values for read"""
 

@@ -2,7 +2,7 @@
 
 # chi_io
 
-Pure Python read/write encryption/decryption of encrypted Tombo chi files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this (there a more modern and better best-practices available since 2004), this is intended to be **compatible** with [Tombo](http://tombo.osdn.jp/En/), Kumagusu, MiniNoteViewer, etc. Tombo chi files are encrypted with blowfish and thus vulnerable to a [32-bit Birthday Attack](https://sweet32.info/).
+Pure Python read/write encryption/decryption of encrypted Tombo chi/chs files. If you are looking for an easy to use with safe and sane defaults for encryption do NOT use this (there a more modern and better best-practices available since 2004), this is intended to be **compatible** with [Tombo](http://tombo.osdn.jp/En/), Kumagusu, MiniNoteViewer, etc. Tombo chi/chs files are encrypted with blowfish and thus vulnerable to a [32-bit Birthday Attack](https://sweet32.info/).
 
 https://github.com/clach04/chi_io
 
@@ -103,7 +103,7 @@ NOTE write_encrypted_file() and read_encrypted_file() can take either file names
 
   * PyCrypto will work fine but PyCryptodome is preferred.
     * The known vulnerability in PyCryptodome is not in the Blowfish implementation
-  * Blowfish is not recommended by its author! Neither is ECB mode which Tombo uses (note Tombo does some additional bit fiddling but using Tombo CHI encryption for sensitive files is not recommended)
+  * Blowfish is not recommended by its author! Neither is ECB mode which Tombo uses (note Tombo does some additional bit fiddling but using Tombo CHI/CHS encryption for sensitive files is not recommended)
   * GNU General Public License v3.0 https://github.com/jashandeep-sohi/python-blowfish the pure Python 3.4+ blowfish implementation works great, but is slower than PyCryptodome
 
 
@@ -135,6 +135,10 @@ Compatible with:
 
 ## File format specification
 
+`*.chi` and `*.chs` use the same format, the only difference between the
+two is that Tombo chs files are automatically/randomly named, using
+only (16) digits. For example, "0000000000000000.chs".
+
 Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob/my_changes/Src/CryptManager.cpp):
 
     //////////////////////////////////////////////////
@@ -162,7 +166,7 @@ See code for both the KDF and the cipher implementation (and padding), Blowfish 
 ## TODO
 
   * Refactor chi_io code
-  * Implement Tombo chi Cipher that follows PEP 272
+  * Implement Tombo chi/chs Cipher that follows PEP 272
   * Update Pure python Blowfish (wrapper or upstream) to support Cipher PEP 272
     API for Block Encryption Algorithms v1.0 https://www.python.org/dev/peps/pep-0272/
   * Check for pycryptodomex first
