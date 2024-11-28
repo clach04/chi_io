@@ -139,6 +139,9 @@ Compatible with:
 two is that Tombo chs files are automatically/randomly named, using
 only (16) digits. For example, "0000000000000000.chs".
 
+An md5 checksum hash is generated from the password, this is then used as the key. I.e. KDF is md5, without any salt/IV.
+The key is then used to encrypt using [Blowfish] cipher(https://en.m.wikipedia.org/wiki/Blowfish_(cipher)) in [ECB mode](https://en.m.wikipedia.org/wiki/Block_cipher_mode_of_operation#ECB-weakness). NOTE each block has additional processing.
+
 Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob/my_changes/Src/CryptManager.cpp):
 
     //////////////////////////////////////////////////
