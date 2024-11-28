@@ -140,7 +140,10 @@ two is that Tombo chs files are automatically/randomly named, using
 only (16) digits. For example, "0000000000000000.chs".
 
 An md5 checksum hash is generated from the password, this is then used as the key. I.e. KDF is md5, without any salt/IV.
-The key is then used to encrypt using [Blowfish] cipher(https://en.m.wikipedia.org/wiki/Blowfish_(cipher)) in [ECB mode](https://en.m.wikipedia.org/wiki/Block_cipher_mode_of_operation#ECB-weakness). NOTE each block has additional processing.
+
+The data to encrypt is prefixed with some random salt.
+
+The key is then used to encrypt using [Blowfish cipher] (https://en.m.wikipedia.org/wiki/Blowfish_(cipher)) in cipher block chaining (CBC) mode, with  **fixed** IV of "BLOWFISH".
 
 Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob/my_changes/Src/CryptManager.cpp):
 
@@ -160,11 +163,11 @@ Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob
   * 4-bytes : `version` : fixed to "BF01". No other value is valid.
   * 4-bytes little-endian : `plaintext_length` : length of the actual plaintext (C++ comment is incorrect/misleading)
   * encrypted payload : `encrypted_bytes` : blowfish encrypted payload, needs to be decrypted and once decypted contains:
-      * 8-bytes little-endian : `random_iv` : Random IV bytes
+      * 8-bytes little-endian : `random_salt` : Random bytes that is prefixed to data before encryption
       * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, essentially Authenticate Then Encrypt
       * `plaintext_length`-bytes : `plaintext` : plain text. NOTE possible padding on the end AFTER `plaintext_length`
 
-See code for both the KDF and the cipher implementation (and padding), Blowfish (64-bit blocks) are used with additional block shuffling.
+See code for both the KDF and the cipher [implementation](https://github.com/clach04/tombo/blob/080a85d9bce3f60a91b7e8ecd5b9f30b5c4e00f9/Src/GNUPG/blowfish.c#L616) (and padding), Blowfish (64-bit blocks) are used with additional block shuffling.
 
 ## TODO
 
