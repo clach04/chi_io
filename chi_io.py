@@ -234,7 +234,7 @@ class UnsupportedFile(ChiIO):
     '''File not encrypted/not supported exception'''
 
 
-def gen_random_string(length_of_str):
+def gen_random_string(length_of_str):  # FIXME limited pool of bytes (originally for debugging purposes) 
     """generate a string containing random characters of length length_of_str"""
     source_set = string.ascii_letters + string.digits + string.punctuation
     result = []
@@ -274,7 +274,7 @@ class PEP272LikeCipher():
     """
 
     # block_size - not implemented
-    # IV - not implemented - IV handled imnternally - TODO support this? not needed for Tombo compat.
+    # IV - not implemented - IV handled internally - TODO support this? not needed for Tombo compat.
 
     #def __init__(self, key, mode, IV=None, **kwargs):  # silently ignore params not implemented
     def __init__(self, key, mode=MODE_ECB):
@@ -325,7 +325,7 @@ class PEP272LikeCipher():
 
         mycounter = encbuf_len
         decrypted_data = []
-        second_pass = list(b"BLOWFISH")
+        second_pass = list(b"BLOWFISH")  # CBC IV/nonce
         while mycounter >= 8:
             data = enc_data[:8]
             #print('')
@@ -426,7 +426,7 @@ class PEP272LikeCipher():
 
         mycounter = len(enc_data)
         encrypted_data = b''
-        second_pass = b"BLOWFISH"
+        second_pass = b"BLOWFISH"  # CBC IV/nonce
         while mycounter >= 8:
             data = enc_data[:8]
 
@@ -458,7 +458,7 @@ class PEP272LikeCipher():
             # dump_bytes(data)
             data = cipher.encrypt(data)
 
-            # take encrypted block and shove into second pass but fiddler (really first pass when encrypting
+            # take encrypted block and shove into second pass bit fiddler (really first pass when encrypting
             second_pass = []
             for x in range(8):
                 second_pass.append(data[x])
