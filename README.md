@@ -135,6 +135,8 @@ Compatible with:
 
 ## File format specification
 
+Also see https://github.com/clach04/chi_io/wiki/CHI-File-Format
+
 `*.chi` and `*.chs` use the same format, the only difference between the
 two is that Tombo chs files are automatically/randomly named, using
 only (16) digits. For example, "0000000000000000.chs".
