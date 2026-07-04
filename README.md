@@ -169,6 +169,8 @@ Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob
       * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, essentially Authenticate Then Encrypt
       * `plaintext_length`-bytes : `plaintext` : plain text. NOTE possible padding on the end AFTER `plaintext_length`
 
+TODO document the padding/bit-fiddling at the end of the file, in the last block. Tombo and chi_io handle this differently!
+
 See code for both the KDF and the cipher [implementation](https://github.com/clach04/tombo/blob/080a85d9bce3f60a91b7e8ecd5b9f30b5c4e00f9/Src/GNUPG/blowfish.c#L616) (and padding), Blowfish (64-bit blocks) are used with additional block shuffling.
 
 ## TODO
