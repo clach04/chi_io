@@ -169,7 +169,26 @@ Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob
       * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, essentially Authenticate Then Encrypt
       * `plaintext_length`-bytes : `plaintext` : plain text. NOTE possible padding on the end AFTER `plaintext_length`
 
-TODO document the padding/bit-fiddling at the end of the file, in the last block. Tombo and chi_io handle this differently!
+### Padding of the final block
+
+After the 24-byte encrypted header area (salt + md5sum) and plaintext,
+Tombo always zero-fills the remainder of a partial block. For bytes that
+fall beyond the end of the plaintext inside that partial block, the
+"plaintext" fed into the cipher is taken from the current CBC chain value
+(i.e. those pad bytes are **not** XORed). Additionally:
+
+  * If the plaintext length is an exact multiple of 8 (so there is no
+    partial block), ONE extra ciphertext block is emitted whose
+    "plaintext" is the current CBC chain value - i.e. a padding-only block.
+  * Decryptors can safely ignore trailing ciphertext blocks, they are not
+    covered by the md5 checksum.
+
+So minimum ciphertext body size is always `((plaintext_length >> 3) + 1) * 8`
+bytes, which together with the header gives files larger than strictly
+needed by up to one block.
+
+`chi_io`'s implementation matches this behaviour exactly (verified
+byte-for-byte against Tombo's CryptManager output).
 
 See code for both the KDF and the cipher [implementation](https://github.com/clach04/tombo/blob/080a85d9bce3f60a91b7e8ecd5b9f30b5c4e00f9/Src/GNUPG/blowfish.c#L616) (and padding), Blowfish (64-bit blocks) are used with additional block shuffling.
 

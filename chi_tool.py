@@ -39,6 +39,8 @@ def main(argv=None):
     parser.add_option("-c", "--codec", help="File encoding", default='utf-8')
     parser.add_option("-p", "--password", help="password, if omitted but OS env CHI_PASSWORD is set use that, if missing prompt")
     parser.add_option("-P", "--password_file", help="file name where password is to be read from, trailing blanks are ignored")
+    parser.add_option("-S", "--salt", dest="salt", default=None,
+                      help="encrypt only: 16 hex digits (8 bytes) fixed salt for deterministic output, e.g. --salt 0000000000000000")
     parser.add_option("-v", "--verbose", action="store_true")
     parser.add_option("-s", "--silent", help="if specified do not warn about stdin using", action="store_false", default=True)
     (options, args) = parser.parse_args(argv[1:])
@@ -105,10 +107,21 @@ def main(argv=None):
                 # encode to stdout encoding  TODO make this optional, potentially useful for py2 too
                 plain_str = plain_str.decode(note_encoding).encode(stream_encoding)
             out_file.write(plain_str)
+            failed = False
         else:
             # encrypt
             plain_text = in_file.read()
-            chi_io.write_encrypted_file(out_file, password, plain_text)
+            if options.salt:
+                if len(options.salt) != 16:
+                    sys.stderr.write('salt must be exactly 16 hex digits (8 bytes)\n')
+                    return 1
+                try:
+                    salt = bytes.fromhex(options.salt)   # py3
+                except AttributeError:                   # pragma py2
+                    salt = options.salt.decode('hex')
+                chi_io.write_encrypted_file(out_file, password, plain_text, salt=salt)
+            else:
+                chi_io.write_encrypted_file(out_file, password, plain_text)
             failed = False
     except chi_io.BadPassword as info:
         print("bad password used. %r" % (info,))

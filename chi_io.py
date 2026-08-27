@@ -277,12 +277,16 @@ class PEP272LikeCipher():
     # IV - not implemented - IV handled internally - TODO support this? not needed for Tombo compat.
 
     #def __init__(self, key, mode, IV=None, **kwargs):  # silently ignore params not implemented
-    def __init__(self, key, mode=MODE_ECB):
+    def __init__(self, key, mode=MODE_ECB, fixed_salt=None):
         if mode != MODE_ECB:
             raise NotImplementedError('Tombo CHI/CHS files are ONLY (Blowfish) ECB mode')
 
         # Assume key is a plain text string (i.e. a byte string, not Unicode type)
         self._key = CHI_cipher(key)  # _key is actually the underlying (Blowfish) Cipher with Tombo derived password/key
+        if fixed_salt is not None:
+            assert isinstance(fixed_salt, bytes), 'salt must be 8-bit bytes'
+            assert len(fixed_salt) == 8, 'salt must be exactly 8 bytes, got %d' % len(fixed_salt)
+        self._fixed_salt = fixed_salt  # only used on encrypt; None means generate randomly
 
     def decrypt(self, string):
         """Decrypts 'string', using the key-dependent data in the object and with the appropriate feedback mode. The string's length must be an exact multiple of the algorithm's block size or, in CFB mode, of the segment size. Returns a string containing the plaintext.
@@ -421,8 +425,10 @@ class PEP272LikeCipher():
         ##  16 bytes of md5 of plaintext
         ##  plain_text_len bytes of plaintext
         # str_to_encrypt = '12345678' + plain_text_md5sum + plain_text
-        # enc_data = '12345678' + plain_text_md5sum + plain_text
-        enc_data = gen_random_string(8) + plain_text_md5sum + plain_text
+        if self._fixed_salt is not None:
+            enc_data = self._fixed_salt + plain_text_md5sum + plain_text
+        else:
+            enc_data = gen_random_string(8) + plain_text_md5sum + plain_text
 
         mycounter = len(enc_data)
         encrypted_data = b''
@@ -495,24 +501,33 @@ class PEP272LikeCipher():
                     tmp_byte_b = ord(tmp_byte_b)
                 plain.append(tmp_byte_a ^ tmp_byte_b)
             if is_py3:
-                data = plain
-            else:
-                data = map(chr, plain)
-
-            # pad the end few bytes so that blowfish can be applied
-            # just take "garbage" from begnning of (last/previously) encrypted block
-            # NOTE this differs from Tombo which takes the garbage from the end of the previously encrypted block
-            for x in range(8 - mycounter):
-                data.append(data[x])
-
-            if is_py3:
                 data = bytes(plain)
             else:  # is py2
-                data = b''.join(data)
+                data = b''.join(map(chr, plain))
+
+            # pad the end few bytes so that blowfish can be applied
+            # NOTE Tombo compatible padding: pad bytes are taken from the
+            # END of the current CBC chain ("second_pass"), WITHOUT being
+            # XORed - i.e. identical to Tombo's BF_Enc() which leaves
+            # buf[j] = ctx->buf[j] for j >= len
+            # https://github.com/clach04/tombo/blob/my_changes/Src/GNUPG/blowfish.c
+            if is_py3:
+                data = data + second_pass[mycounter:]
+            else:
+                data = data + second_pass[mycounter:]
 
             # Now encrypt
             data = cipher.encrypt(data)
             encrypted_data = encrypted_data + data
+
+        # Byte-exact Tombo compatibility: when the payload is an exact
+        # multiple of the 8-byte block size (so no partial block exists),
+        # Tombo still emits ONE extra ciphertext block after the final
+        # full block. Its "plaintext" is the current CBC chain value
+        # (i.e. a padding-only block, equivalent to CBC-encrypting 8
+        # zero bytes).
+        if plain_text_len > 0 and (plain_text_len % 8) == 0:
+            encrypted_data = encrypted_data + cipher.encrypt(second_pass)
 
         # FIXME avoid concatenation
         """
@@ -559,7 +574,7 @@ def read_encrypted_file(fileinfo, password):
     return unencrypted_str
 
 
-def write_encrypted_file(fileinfo, password, plaintext):
+def write_encrypted_file(fileinfo, password, plaintext, salt=None):
     """Writes an encrypted *.chi / *.chs file that could be read by Tombo. Parameter plaintext should be 8 bit string.
     Raises exceptions on failure (so caller is responsible for cleaning up incomplete out files).
     NOTE: if notes created with this routine are to be read in Tombo
@@ -568,9 +583,13 @@ def write_encrypted_file(fileinfo, password, plaintext):
 
     fileinfo is either a filename (string) or a file-like object that writes binary bytes that be can written to (caller is responsible for closing)
     password is a (byte) string, i.e. not Unicode type
+    salt is an optional 8 byte salt, if omitted a random one is generated.
+    Providing a fixed salt results in deterministic output for the same
+    password+plaintext (useful for test vectors), but weakens the format's
+    protection against equal-plaintext/equal-password identification.
 
     """
-    cipher = PEP272LikeCipher(password)
+    cipher = PEP272LikeCipher(password, fixed_salt=salt)
     crypted_data = cipher.encrypt(plaintext)
 
     assert isinstance(
