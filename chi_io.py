@@ -234,8 +234,13 @@ class UnsupportedFile(ChiIO):
     '''File not encrypted/not supported exception'''
 
 
-def gen_random_string(length_of_str):  # FIXME limited pool of bytes (originally for debugging purposes) 
-    """generate a string containing random characters of length length_of_str"""
+def gen_random_string(length_of_str):  # FIXME limited pool of bytes (originally for debugging purposes)
+    """generate a string containing random characters of length length_of_str
+
+    NOTE not cryptographically secure (random module, limited pool) and no
+    longer used for salt generation - os.urandom() is used instead. Kept for
+    backwards compatibility.
+    """
     source_set = string.ascii_letters + string.digits + string.punctuation
     result = []
     for x in range(length_of_str):
@@ -428,7 +433,10 @@ class PEP272LikeCipher():
         if self._fixed_salt is not None:
             enc_data = self._fixed_salt + plain_text_md5sum + plain_text
         else:
-            enc_data = gen_random_string(8) + plain_text_md5sum + plain_text
+            # cryptographically secure salt; the historic random-module
+            # based gen_random_string() is kept for backwards compatibility
+            # but is no longer used here
+            enc_data = os.urandom(8) + plain_text_md5sum + plain_text
 
         mycounter = len(enc_data)
         encrypted_data = b''
