@@ -295,6 +295,113 @@ class TestChiIO(TestChiIOBase):
         self.assertEqual(b"text is just a small piece of text.", result_data)
 
 
+class TestChiIOPadding(TestChiIOBase):
+    ## Pinned unit tests for Tombo BF01 padding semantics:
+    ##   * tail padding: pad bytes beyond the end of a partial block are
+    ##     taken from the current CBC chain value, NOT XORed
+    ##   * when plaintext length is an exact multiple of 8 an extra
+    ##     padding-only cipher block is emitted
+    ## Byte values below were generated with this implementation, which is
+    ## verified byte-identical to TomboCrypt and chi_crypt (see
+    ## C:\code\c\chi_c test harness). Fixed salt used for determinism.
+
+    password = b'mypassword'
+    salt = b'12345678'
+
+    def make_cipher(self):
+        return chi_io.PEP272LikeCipher(self.password, fixed_salt=self.salt)
+
+    @staticmethod
+    def plaintext_of_size(n):
+        # deterministic non-trivial bytes (not all zeros, not ASCII)
+        return bytes(bytearray((i * 7 + 3) % 256 for i in range(n)))
+
+    def expected_ciphertext_len(self, plaintext_len):
+        """8 byte header (magic + length) plus whole 8-byte cipher blocks:
+        salt(8) + md5(16) + plaintext(+padding to block boundary), plus ONE
+        extra padding-only block when plaintext_len is a multiple of 8."""
+        payload = 24 + plaintext_len
+        blocks = (payload + 7) // 8  # ceil, covers tail padding block
+        if (plaintext_len % 8) == 0:
+            blocks += 1  # padding-only extra block
+        return 8 + (blocks * 8)
+
+    def test_ciphertext_lengths(self):
+        for n in (0, 1, 7, 8, 9, 15, 16, 17, 24, 100):
+            cipher = self.make_cipher()
+            crypted_data = cipher.encrypt(self.plaintext_of_size(n))
+            self.assertEqual(
+                self.expected_ciphertext_len(n), len(crypted_data),
+                'wrong ciphertext length for plaintext size %d' % n
+            )
+
+    def test_extra_padding_only_block_multiple_of_8(self):
+        # sizes 8, 16, 24 (exact block multiples) must emit ONE extra block.
+        # 40 = 8 header ("BF01" + uint32 length) + 4 blocks of salt(8) +
+        # md5(16) + first plaintext block; the plaintext adds n/8 blocks
+        # and the padding-only rule adds 1 more, giving 40 + n bytes.
+        for n in (8, 16, 24):
+            cipher = self.make_cipher()
+            crypted_data = cipher.encrypt(self.plaintext_of_size(n))
+            self.assertEqual(40 + n, len(crypted_data))
+
+    def test_encrypt_decrypt_roundtrip_edge_sizes(self):
+        for n in (0, 1, 7, 8, 9, 15, 16, 17, 24, 100):
+            plain_text = self.plaintext_of_size(n)
+            cipher = self.make_cipher()
+            crypted_data = cipher.encrypt(plain_text)
+            result_data = cipher.decrypt(crypted_data)
+            self.assertEqual(plain_text, result_data)
+
+    def test_empty_plaintext(self):
+        plain_text = b''
+        cipher = self.make_cipher()
+        crypted_data = cipher.encrypt(plain_text)
+        # 40 = 8 header ("BF01" + uint32 length) + 4 cipher blocks:
+        #   salt(8) + md5(16) + plaintext(0) = 24 bytes = 3 whole blocks,
+        #   and since 0 % 8 == 0 the padding-only rule emits 1 extra block
+        self.assertEqual(40, len(crypted_data))
+        result_data = cipher.decrypt(crypted_data)
+        self.assertEqual(plain_text, result_data)
+
+    def test_pinned_ciphertexts(self):
+        import hashlib
+        expected_md5s = {
+            0: b'a6f1d27c1bd287a9466ed1aefbfad1b9',
+            1: b'54d2dda4dc38c3ed42480fd36fd00fa9',
+            7: b'eb30bfac81e7c8d3c468446b3c68fc32',
+            8: b'a7649b6bd85684ac93040726a2a7ed0f',
+        }
+        # pin via md5 of ciphertext (keeps this file readable) AND exact length
+        for n, expected_md5 in sorted(expected_md5s.items()):
+            cipher = self.make_cipher()
+            crypted_data = cipher.encrypt(self.plaintext_of_size(n))
+            self.assertEqual(
+                self.expected_ciphertext_len(n), len(crypted_data),
+                'pinned length mismatch for plaintext size %d' % n
+            )
+            got_md5 = hashlib.md5(crypted_data).hexdigest().encode('us-ascii')
+            self.assertEqual(
+                expected_md5, got_md5,
+                'pinned ciphertext mismatch for plaintext size %d' % n
+            )
+            # decrypt back
+            self.assertEqual(self.plaintext_of_size(n), cipher.decrypt(crypted_data))
+
+    def test_random_salt_changes_ciphertext_but_not_length(self):
+        plain_text = self.plaintext_of_size(8)
+        cipher_fixed = self.make_cipher()
+        ct_fixed = cipher_fixed.encrypt(plain_text)
+        cipher_rand = chi_io.PEP272LikeCipher(self.password)  # random salt
+        ct_rand1 = cipher_rand.encrypt(plain_text)
+        ct_rand2 = cipher_rand.encrypt(plain_text)
+        self.assertEqual(len(ct_fixed), len(ct_rand1))
+        self.assertNotEqual(ct_fixed, ct_rand1)
+        self.assertNotEqual(ct_rand1, ct_rand2)
+        self.assertEqual(plain_text, cipher_rand.decrypt(ct_rand1))
+        self.assertEqual(plain_text, cipher_rand.decrypt(ct_rand2))
+
+
 class TestCompatChiData(TestChiIOBase):
     ## Test that can read files generated from Windows Tombo
     ## http://tombo.sourceforge.jp/En/
