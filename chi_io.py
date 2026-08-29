@@ -526,7 +526,7 @@ class PEP272LikeCipher():
         # full block. Its "plaintext" is the current CBC chain value
         # (i.e. a padding-only block, equivalent to CBC-encrypting 8
         # zero bytes).
-        if plain_text_len > 0 and (plain_text_len % 8) == 0:
+        if (plain_text_len % 8) == 0:
             encrypted_data = encrypted_data + cipher.encrypt(second_pass)
 
         # FIXME avoid concatenation
