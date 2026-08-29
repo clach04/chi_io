@@ -207,6 +207,22 @@ Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob
       * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, integrity check only (unkeyed, not a MAC - see [Security considerations](#security-considerations))
       * `plaintext_length`-bytes : `plaintext` : plain text. NOTE possible padding on the end AFTER `plaintext_length`
 
+### Format essentials
+
+ 1. Layout after magic `"BF01"` + little-endian uint32 `plaintext_length`:
+    encrypted body = salt(8) + md5(plaintext)(16) + plaintext(+padding).
+    Everything from byte 8 onward is encrypted. Decryptors must ignore
+    trailing bytes; only the embedded MD5 validates a decryption.
+ 2. KDF is straight MD5 of the passphrase UTF-8 bytes (**no NUL**), 16-byte
+    result used directly as the Blowfish key.
+ 3. CBC chain seed/IV is the literal ASCII string `"BLOWFISH"` - NOT zeros,
+    NOT the stored salt. Getting this wrong diverges the *entire* ciphertext
+    stream, not just a tail block.
+ 4. Final-block padding: pad bytes beyond the end of the partial block are
+    taken from the current CBC chain value un-XORed; when plaintext length is
+    an exact multiple of 8 an extra padding-only cipher block is emitted.
+
+
 ### Padding of the final block
 
 After the 24-byte encrypted header area (salt + md5sum) and plaintext,
