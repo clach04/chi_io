@@ -366,9 +366,18 @@ class TestChiIOPadding(TestChiIOBase):
 
     def test_pinned_ciphertexts(self):
         import hashlib
+        # Sizes 0..8 cover every possible tail/padding situation:
+        # each partial-block pad amount 1..7, the exact-multiple-of-8
+        # case (0, 8) which emits an extra padding-only block, and the
+        # empty-plaintext edge case.
         expected_md5s = {
             0: b'a6f1d27c1bd287a9466ed1aefbfad1b9',
             1: b'54d2dda4dc38c3ed42480fd36fd00fa9',
+            2: b'185d528519bb2dee84a008e64f27c25c',
+            3: b'dc3d7cd15641c5635b26dda80116c244',
+            4: b'07262bd5533cee17183162defd9bd30e',
+            5: b'8c6536ff94921897b66156302be58c55',
+            6: b'a5b9878905c085b2b856364fbf917116',
             7: b'eb30bfac81e7c8d3c468446b3c68fc32',
             8: b'a7649b6bd85684ac93040726a2a7ed0f',
         }
