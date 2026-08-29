@@ -21,6 +21,7 @@ Can be used standalone, used by Puren Tonbo https://github.com/clach04/puren_ton
       - [Using filenames](#using-filenames)
   * [Tests](#tests)
   * [NOTES](#notes)
+  * [Security considerations](#security-considerations)
   * [Also see](#also-see)
   * [File format specification](#file-format-specification)
   * [TODO](#todo)
@@ -107,6 +108,43 @@ NOTE write_encrypted_file() and read_encrypted_file() can take either file names
   * GNU General Public License v3.0 https://github.com/jashandeep-sohi/python-blowfish the pure Python 3.4+ blowfish implementation works great, but is slower than PyCryptodome
 
 
+## Security considerations
+
+**This format is not secure storage.** It exists for Tombo/Kumagusu/
+MiniNoteViewer compatibility only. Concretely:
+
+  * **KDF is a single, unsalted MD5 of the passphrase UTF-8 bytes** (no NUL
+    terminator). The 16-byte digest is used directly as the Blowfish key.
+    There is no key stretching (no iterations, no salt), so the key can be
+    derived in microseconds - dictionary and brute-force attacks are
+    trivially cheap on modern hardware. Passwords are effectively the only
+    barrier.
+  * **The embedded MD5 is not a MAC.** The `plaintext_md5` stored in the file
+    provides integrity checking / corruption detection for a successful
+    decryption only. It is unkeyed and there is no authentication: an
+    attacker can tamper with ciphertext (or even attempt byte-level malleability
+    against the CBC stream) and the change may not be detectable until after
+    decryption. Do not treat successful decryption + MD5 match as proof of
+    authenticity.
+  * **Fixed, known IV** ("BLOWFISH" as literal ASCII, not the stored salt)
+    and a password-derived key reused across all files means identical
+    plaintext prefixes under the same passphrase produce identical
+    ciphertext prefixes (CBC leaks this with a constant IV).
+  * **64-bit Blowfish blocks** - [SWEET32](https://sweet32.info/) birthday
+    bound applies to large files.
+  * The 8-byte `random_salt` field adds randomness but is never mixed into
+    the key - it does not strengthen the KDF in any way.
+
+For new secrets use a modern format instead, e.g. Age,
+[`pyca/cryptography` Fernet](https://cryptography.io/en/latest/fernet/) or
+[`pynacl` SecretBox](https://pynacl.readthedocs.io/en/latest/secret/) with a
+stretching KDF such as Argon2 or PBKDF2.
+
+Byte-compatibility note: `chi_io` output has been verified byte-identical
+to both the original Tombo  reference implementation and the C99
+[`chi_crypt`](https://github.com/clach04/chi_c) implementation, so files
+round-trip freely between all three tools.
+
 ## Also see
 
 Compatible with:
@@ -166,7 +204,7 @@ Copy and paste from [Src/CryptManager.cpp](https://github.com/clach04/tombo/blob
   * 4-bytes little-endian : `plaintext_length` : length of the actual plaintext (C++ comment is incorrect/misleading)
   * encrypted payload : `encrypted_bytes` : blowfish encrypted payload, needs to be decrypted and once decypted contains:
       * 8-bytes little-endian : `random_salt` : Random bytes that is prefixed to data before encryption
-      * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, essentially Authenticate Then Encrypt
+      * 16-bytes little-endian : `plaintext_md5` : md5sum of the plaintext, integrity check only (unkeyed, not a MAC - see [Security considerations](#security-considerations))
       * `plaintext_length`-bytes : `plaintext` : plain text. NOTE possible padding on the end AFTER `plaintext_length`
 
 ### Padding of the final block
